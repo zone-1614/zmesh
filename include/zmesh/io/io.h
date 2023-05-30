@@ -10,16 +10,30 @@ using core::Mesh;
 
 namespace io {
 
+//! @param[out] mesh 输出网格
+//! @param[in] file 输入文件
+//! @return 读取是否成功
 bool read(Mesh& mesh, const std::filesystem::path& file);
 
+//! @param[out] mesh 输出网格
+//! @param[in] file 输入文件
+//! @param[in] options io选项
+//! @return 读取是否成功
 bool read(Mesh& mesh, const std::filesystem::path& file, const io_options& options);
 
 // void read_obj(Mesh& mesh, const std::filesystem::path& file, const io_options& options);
 
 // void read_off(Mesh& mesh, const std::filesystem::path& file, const io_options& options);
 
+//! @param[in] mesh 输入网格
+//! @param[in] file 写入文件
+//! @return 写入是否成功
 void write(Mesh& mesh, const std::filesystem::path& file);
 
+//! @param[in] mesh 输入网格
+//! @param[in] file 写入文件
+//! @param[in] options io选项
+//! @return 写入是否成功
 void write(Mesh& mesh, const std::filesystem::path& file, const io_options& options);
 
 // void write_obj(Mesh& mesh, const std::filesystem::path& file, const io_options& options);

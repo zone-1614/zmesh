@@ -5,7 +5,7 @@ repo_url: https://github.com/zone-1614/zmesh
 
 nav: 
   - Introduction: index.md
-  - API: Api/index_classes.md
+  - API: Api/index_namespaces.md
   - Tutorials: 
     - 配置环境: Tutorials/配置环境.md
   - Code: https://github.com/zone-1614/zmesh

@@ -13,6 +13,8 @@
 namespace zmesh {
 namespace io {
 
+//! @class ObjReader
+//! @brief 从obj文件读入网格
 class ObjReader : public BaseReader {
 public:
     bool read(Mesh& mesh, const std::filesystem::path& file, const io_options& options) {

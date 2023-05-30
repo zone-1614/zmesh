@@ -49,9 +49,13 @@ title: Classes
         * **class [VertexCenterTrait](Classes/structzmesh_1_1core_1_1_vertex_center_trait.md)** <br>以Vertex做中心的Circulator Trait 
         * **class [VertexHandle](Classes/classzmesh_1_1core_1_1_vertex_handle.md)** <br>用来表示Vertex的Handle 
         * **class [VertexPropertyHandle](Classes/classzmesh_1_1core_1_1_vertex_property_handle.md)** <br>顶点属性的Handle 可以用VertexHandle来访问属性 
+    * **namespace [io](Namespaces/namespacezmesh_1_1io.md)** 
+        * **class [BaseReader](Classes/classzmesh_1_1io_1_1_base_reader.md)** <br>所有Reader的基类 
+        * **class [ObjReader](Classes/classzmesh_1_1io_1_1_obj_reader.md)** <br>从obj文件读入网格 
+        * **class [io_options](Classes/structzmesh_1_1io_1_1io__options.md)** <br>用来控制是否读/写顶点法向, 顶点纹理坐标, 顶点颜色等等 这个类暂时没啥用 
 
 
 
 -------------------------------
 
-Updated on 2023-05-27 at 20:04:06 +0800
+Updated on 2023-05-30 at 09:04:12 +0800

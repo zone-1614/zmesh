@@ -11,7 +11,7 @@ using core::Mesh;
 
 namespace io {
 
-// c++ stl does not contain trim
+//! 类似java里面的trim, 去掉字符串前面后面的空白字符
 void trim(std::string& str) {
     size_t start = str.find_first_not_of(" \t\r\n");
     size_t end = str.find_last_not_of(" \t\r\n");
@@ -22,11 +22,17 @@ void trim(std::string& str) {
     }
 }
 
+//! @class BaseReader
+//! @brief 所有Reader的基类
 class BaseReader {
 public:
+    //! @brief 根据io选项, 从文件读入网格
+    //! @param[out] 输出网格
+    //! @param[in] 输入文件
+    //! @param[in] io选项
     virtual bool read(Mesh& mesh, const std::filesystem::path& file, const io_options& options) = 0;
 
-    // file extension name
+    //! 返回文件拓展名
     virtual std::string extension() const = 0;
 };
 
