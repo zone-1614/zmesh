@@ -11,8 +11,8 @@ title: zmesh
 
 | Name           |
 | -------------- |
-| **[zmesh::core](Namespaces/namespacezmesh_1_1core.md)**  |
-| **[zmesh::io](Namespaces/namespacezmesh_1_1io.md)**  |
+| **[zmesh::core](./namespacezmesh_1_1core.md)**  |
+| **[zmesh::io](./namespacezmesh_1_1io.md)**  |
 
 ## Detailed Description
 
