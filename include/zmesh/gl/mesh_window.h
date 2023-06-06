@@ -37,6 +37,14 @@ public:
 public:
     virtual ~MeshWindow();
 
+    MeshWindow& operator=(const MeshWindow& rhs) {
+        this->glfw_window_ = rhs.glfw_window_;
+        this->mesh_ = rhs.mesh_;
+        
+        ImGui_ImplGlfw_InitForOpenGL(glfw_window_, true);
+        glfwSetWindowUserPointer(glfw_window_, this);
+        glfwMakeContextCurrent(glfw_window_);
+    }
     //! load mesh from obj
     void load_mesh(const std::filesystem::path& path);
 

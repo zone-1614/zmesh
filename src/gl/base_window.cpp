@@ -65,8 +65,6 @@ BaseWindow::BaseWindow(int width, int height, const std::string& title)
 }
 
 void BaseWindow::run() {
-    glfwSetWindowUserPointer(glfw_window_, this);
-    glfwMakeContextCurrent(glfw_window_);
     while (!glfwWindowShouldClose(glfw_window_)) {
         render();
     }

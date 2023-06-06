@@ -4,7 +4,7 @@ namespace zmesh {
 namespace gl {
 
 MeshWindowBuilder::MeshWindowBuilder()
-    : mesh_window_ptr_(new MeshWindow(800, 600, "mesh")) {
+    : mesh_window_ptr_(std::make_unique<MeshWindow>(800, 600, "mesh")) {
     // default settings
 }
 
@@ -35,8 +35,8 @@ MeshWindowBuilder& MeshWindowBuilder::draw_mode(DrawMode mode) {
     return *this;
 }
 
-MeshWindowBuilder::operator MeshWindow() {
-    return *mesh_window_ptr_;
+std::unique_ptr<MeshWindow> MeshWindowBuilder::pointer() {
+    return std::move(mesh_window_ptr_);
 }
 
 }

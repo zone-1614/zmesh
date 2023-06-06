@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
 
 #include <zmesh/gl/mesh_window.h>
 
@@ -21,10 +22,10 @@ public:
 
     MeshWindowBuilder& draw_mode(DrawMode mode);
 
-    operator MeshWindow();
+    std::unique_ptr<MeshWindow> pointer();
     
 private:
-    MeshWindow* mesh_window_ptr_;
+    std::unique_ptr<MeshWindow> mesh_window_ptr_;
 };
 
 }

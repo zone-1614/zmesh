@@ -6,20 +6,17 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <zmesh/core/properties.h>
-#include <zmesh/core/mesh.h>
-#include <zmesh/io/io.h>
-#include <zmesh/gl/mesh_window.h>
-#include <zmesh/gl/mesh_window_builder.h>
+#include <zmesh/zmesh.h>
 
 int main() {
-    zmesh::gl::MeshWindow window = zmesh::gl::MeshWindow::create()
+    auto window_ptr = zmesh::MeshWindow::create()
         .width(800)
         .height(600)
         .title("zmesh window title")
         .mesh(std::filesystem::path("./models/Balls.obj"))
-        .draw_mode(zmesh::gl::DrawMode::Wireframe)
+        .draw_mode(zmesh::DrawMode::Wireframe)
+        .pointer()
         ;
 
-    window.run();
+    window_ptr->run();
 }
