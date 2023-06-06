@@ -12,7 +12,7 @@ project(
 # zmesh options 
 option(ZMESH_TESTS "enable testing for ZMesh" OFF)
 
-find_path(STB_INCLUDE_DIRS "stb_c_lexer.h")
+find_path(STB_INCLUDE_DIRS "stb_image_write.h")
 
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)

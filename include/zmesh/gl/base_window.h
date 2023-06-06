@@ -11,11 +11,10 @@
 #pragma once
 
 #include <string>
+#include <array>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-#include <zmesh/gl/callbacks.h>
 
 namespace zmesh {
 namespace gl {
@@ -32,9 +31,12 @@ public:
 protected:
     virtual void render() = 0;
 
-    virtual void init_callbacks();
-
     virtual void init_imgui_style();
+
+    void log_info() const;
+
+private:
+    void init_callbacks();
 
 public:
     //! get the width of window
@@ -68,39 +70,39 @@ public:
     void screenshot();
 
 protected:
-    // callback function pointers
-    KeyCallback key_callback_;
-
-    CharacterCallback character_callback_;
-
-    CursorPosCallback cursor_pos_callback_;
-
-    CursorEnterCallback cursor_enter_callback_;
-
-    MouseButtonCallback mouse_button_callback_;
-
-    ScrollCallback scroll_callback_;
-
-    DropCallback drop_callback_;
-
-    FramebufferSizeCallback framebuffer_size_callback_;
-
     // callback functions
-    static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    virtual void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {}
 
-    static void character_callback(GLFWwindow* window, unsigned int codepoint);
+    virtual void character_callback(GLFWwindow* window, unsigned int codepoint) {}
 
-    static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
+    virtual void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {}
 
-    static void cursor_enter_callback(GLFWwindow* window, int entered);
+    virtual void cursor_enter_callback(GLFWwindow* window, int entered) {}
 
-    static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+    virtual void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {}
 
-    static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+    virtual void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {}
 
-    static void drop_callback(GLFWwindow* window, int count, const char** paths);
+    virtual void drop_callback(GLFWwindow* window, int count, const char** paths) {}
 
-    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    virtual void framebuffer_size_callback(GLFWwindow* window, int width, int height) {}
+
+    // static callback functions
+    static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+    static void CharacterCallback(GLFWwindow* window, unsigned int codepoint);
+
+    static void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
+
+    static void CursorEnterCallback(GLFWwindow* window, int entered);
+
+    static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+
+    static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
+    static void DropCallback(GLFWwindow* window, int count, const char** paths);
+
+    static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 protected:
     int width_;
@@ -115,6 +117,9 @@ protected:
     bool right_shift_pressed_{false};
     bool right_ctrl_pressed_{false};
     bool right_alt_pressed_{false};
+
+    // 是否按下鼠标
+    std::array<bool, 8> button_pressed_{false};
 };
 
 }

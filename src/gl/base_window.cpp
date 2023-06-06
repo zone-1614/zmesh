@@ -2,11 +2,11 @@
 
 #include <sstream>
 #include <stdexcept>
-#include <chrono>
-#include <iomanip>
 #include <algorithm>
+#include <filesystem>
 
 #include <spdlog/spdlog.h>
+#define STBIW_WINDOWS_UTF8
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 #include <imgui.h>
@@ -44,8 +44,6 @@ BaseWindow::BaseWindow(int width, int height, const std::string& title)
     glViewport(0, 0, width_, height_);
     glEnable(GL_DEPTH_TEST);
 
-    // spdlog::info("OpenGL Version: {}", glGetString(GL_VERSION));
-
     // init imgui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -59,7 +57,9 @@ BaseWindow::BaseWindow(int width, int height, const std::string& title)
     ImGui_ImplGlfw_InitForOpenGL(glfw_window_, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
-    // spdlog::info("ImGui Version: {}", ImGui::GetVersion());
+    init_callbacks();
+    
+    log_info();
 }
 
 void BaseWindow::run() {
@@ -69,29 +69,44 @@ void BaseWindow::run() {
 }
 
 void BaseWindow::init_callbacks() {
-    key_callback_ = BaseWindow::key_callback;
-    character_callback_ = BaseWindow::character_callback;
-    cursor_pos_callback_ = BaseWindow::cursor_pos_callback;
-    cursor_enter_callback_ = BaseWindow::cursor_enter_callback;
-    mouse_button_callback_ = BaseWindow::mouse_button_callback;
-    scroll_callback_ = BaseWindow::scroll_callback;
-    drop_callback_ = BaseWindow::drop_callback;
-    framebuffer_size_callback_ = BaseWindow::framebuffer_size_callback;
+    // key_callback_ = BaseWindow::key_callback;
+    // character_callback_ = BaseWindow::character_callback;
+    // cursor_pos_callback_ = BaseWindow::cursor_pos_callback;
+    // cursor_enter_callback_ = BaseWindow::cursor_enter_callback;
+    // mouse_button_callback_ = BaseWindow::mouse_button_callback;
+    // scroll_callback_ = BaseWindow::scroll_callback;
+    // drop_callback_ = BaseWindow::drop_callback;
+    // framebuffer_size_callback_ = BaseWindow::framebuffer_size_callback;
 
-    glfwSetKeyCallback(glfw_window_, key_callback_);
-    glfwSetCharCallback(glfw_window_, character_callback_);
-    glfwSetCursorPosCallback(glfw_window_, cursor_pos_callback_);
-    glfwSetCursorEnterCallback(glfw_window_, cursor_enter_callback_);
-    glfwSetMouseButtonCallback(glfw_window_, mouse_button_callback_);
-    glfwSetScrollCallback(glfw_window_, scroll_callback_);
-    glfwSetDropCallback(glfw_window_, drop_callback_);
-    glfwSetFramebufferSizeCallback(glfw_window_, framebuffer_size_callback_);
+    glfwSetKeyCallback(glfw_window_, BaseWindow::KeyCallback);
+    glfwSetCharCallback(glfw_window_, BaseWindow::CharacterCallback);
+    glfwSetCursorPosCallback(glfw_window_, BaseWindow::CursorPosCallback);
+    glfwSetCursorEnterCallback(glfw_window_, BaseWindow::CursorEnterCallback);
+    glfwSetMouseButtonCallback(glfw_window_, BaseWindow::MouseButtonCallback);
+    glfwSetScrollCallback(glfw_window_, BaseWindow::ScrollCallback);
+    glfwSetDropCallback(glfw_window_, BaseWindow::DropCallback);
+    glfwSetFramebufferSizeCallback(glfw_window_, BaseWindow::FramebufferSizeCallback);
 }
 
 void BaseWindow::init_imgui_style() {
     // custom imgui style
     ImGuiStyle& style = ImGui::GetStyle();
     
+}
+
+void BaseWindow::log_info() const {
+    std::stringstream log_info_ss;
+    log_info_ss << glGetString(GL_VENDOR);
+    spdlog::info("OpenGL Vendor: {}", log_info_ss.str());
+    log_info_ss.str("");
+    log_info_ss << glGetString(GL_RENDERER);
+    spdlog::info("OpenGL Renderer: {}", log_info_ss.str());
+    log_info_ss.str("");
+    log_info_ss << glGetString(GL_VERSION);
+    spdlog::info("OpenGL Version: {}", log_info_ss.str());
+    log_info_ss.str("");
+    log_info_ss << ImGui::GetVersion();
+    spdlog::info("ImGui Version: {}", log_info_ss.str());
 }
 
 int BaseWindow::width() const {
@@ -133,17 +148,14 @@ bool BaseWindow::right_alt_pressed() const {
 }
 
 void BaseWindow::screenshot() {
-    std::stringstream filename;
-    filename << "./screenshot/" << title_ << "  ";
-    // add time to the end of filename
-    const auto now = std::chrono::system_clock::now();
-    const auto t = std::chrono::system_clock::to_time_t(now);
-    filename << std::put_time(std::localtime(&t), "%Y-%m-%d %X") << ".png";
-    std::string fname = filename.str();
-    // replace the space to _
-    std::replace(fname.begin(), fname.end(), ' ', '_');
+    // 不存在则创建screenshot目录
+    std::filesystem::create_directory("./screenshot");
 
-    // allocate
+    static int screenshot_number = 0;
+    std::stringstream filename;
+    filename << "./screenshot/" << title_ << "_" << screenshot_number++ << ".png";
+
+    // allocate memory
     auto png_data = new unsigned char[3 * width_ * height_];
 
     // read the framebuffer
@@ -151,42 +163,92 @@ void BaseWindow::screenshot() {
     glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, png_data);
 
     // save the screen to png  (use stb image)
+    glfwMakeContextCurrent(glfw_window_);
     stbi_flip_vertically_on_write(true);
-    stbi_write_png(fname.c_str(), width_, height_, 3, png_data, 3 * width_);
+    stbi_write_png(filename.str().c_str(), width_, height_, 3, png_data, 3 * width_);
+
+    spdlog::info("Save screenshot to {}", filename.str().c_str());
 
     delete[] png_data;
 }
 
-void BaseWindow::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void BaseWindow::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    // if (!ImGui::GetIO().WantCaptureKeyboard)
+    switch (key) {
+        case GLFW_KEY_LEFT_SHIFT:
+            base_window->left_shift_pressed_ = (action != GLFW_RELEASE);
+            break;
+        case GLFW_KEY_LEFT_CONTROL:
+            base_window->left_ctrl_pressed_ = (action != GLFW_RELEASE);
+            break;
+        case GLFW_KEY_LEFT_ALT:
+            base_window->left_alt_pressed_ = (action != GLFW_RELEASE);
+            break;
+        case GLFW_KEY_RIGHT_SHIFT:
+            base_window->right_shift_pressed_ = (action != GLFW_RELEASE);
+            break;
+        case GLFW_KEY_RIGHT_CONTROL:
+            base_window->right_ctrl_pressed_ = (action != GLFW_RELEASE);
+            break;
+        case GLFW_KEY_RIGHT_ALT:
+            base_window->right_alt_pressed_ = (action != GLFW_RELEASE);
+            break;
+    }
+    base_window->key_callback(window, key, scancode, action, mods);
 }
 
-void BaseWindow::character_callback(GLFWwindow* window, unsigned int codepoint) {
+void BaseWindow::CharacterCallback(GLFWwindow* window, unsigned int codepoint) {
+    ImGui_ImplGlfw_CharCallback(window, codepoint);
 
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    base_window->character_callback(window, codepoint);
 }
 
-void BaseWindow::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
+void BaseWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    base_window->cursor_pos_callback(window, xpos, xpos);
 }
 
-void BaseWindow::cursor_enter_callback(GLFWwindow* window, int entered) {
+void BaseWindow::CursorEnterCallback(GLFWwindow* window, int entered) {
+    ImGui_ImplGlfw_CursorEnterCallback(window, entered);
 
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    base_window->cursor_enter_callback(window, entered);
 }
 
-void BaseWindow::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+void BaseWindow::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    // if (!ImGui::GetIO().WantCaptureMouse)
+    base_window->button_pressed_[button] = (action == GLFW_PRESS);
+    base_window->mouse_button_callback(window, button, action, mods);
 }
 
-void BaseWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+void BaseWindow::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    base_window->scroll_callback(window, xoffset, yoffset);
 }
 
-void BaseWindow::drop_callback(GLFWwindow* window, int count, const char** paths) {
-
+void BaseWindow::DropCallback(GLFWwindow* window, int count, const char** paths) {
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    base_window->drop_callback(window, count, paths);
 }
 
-void BaseWindow::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void BaseWindow::FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    BaseWindow* base_window = static_cast<BaseWindow*>(glfwGetWindowUserPointer(window));
+    base_window->width_ = width;
+    base_window->height_ = height;
+    glViewport(0, 0, width, height);
     
+    base_window->framebuffer_size_callback(window, width, height);
 }
 
 }
