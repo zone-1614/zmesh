@@ -45,6 +45,9 @@ public:
     //! get the height of window
     int height() const;
 
+    //! get the size of window
+    std::pair<int, int> size() const;
+
     //! get the position of cursor
     std::pair<double, double> cursor_pos() const;
 

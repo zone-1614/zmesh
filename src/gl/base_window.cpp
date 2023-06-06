@@ -13,6 +13,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <zmesh/gl/mesh_window_builder.h>
+
 namespace zmesh {
 namespace gl {
 
@@ -63,21 +65,14 @@ BaseWindow::BaseWindow(int width, int height, const std::string& title)
 }
 
 void BaseWindow::run() {
+    glfwSetWindowUserPointer(glfw_window_, this);
+    glfwMakeContextCurrent(glfw_window_);
     while (!glfwWindowShouldClose(glfw_window_)) {
         render();
     }
 }
 
 void BaseWindow::init_callbacks() {
-    // key_callback_ = BaseWindow::key_callback;
-    // character_callback_ = BaseWindow::character_callback;
-    // cursor_pos_callback_ = BaseWindow::cursor_pos_callback;
-    // cursor_enter_callback_ = BaseWindow::cursor_enter_callback;
-    // mouse_button_callback_ = BaseWindow::mouse_button_callback;
-    // scroll_callback_ = BaseWindow::scroll_callback;
-    // drop_callback_ = BaseWindow::drop_callback;
-    // framebuffer_size_callback_ = BaseWindow::framebuffer_size_callback;
-
     glfwSetKeyCallback(glfw_window_, BaseWindow::KeyCallback);
     glfwSetCharCallback(glfw_window_, BaseWindow::CharacterCallback);
     glfwSetCursorPosCallback(glfw_window_, BaseWindow::CursorPosCallback);
@@ -115,6 +110,10 @@ int BaseWindow::width() const {
 
 int BaseWindow::height() const {
     return height_;
+}
+
+std::pair<int, int> BaseWindow::size() const {
+    return {width_, height_};
 }
 
 std::pair<double, double> BaseWindow::cursor_pos() const {

@@ -1,66 +1,60 @@
 #pragma once
 
-#include <zmesh/gl/base_window.h>
+#include <filesystem>
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <spdlog/spdlog.h>
 
+#include <zmesh/core/mesh.h>
+#include <zmesh/gl/base_window.h>
+
 namespace zmesh {
 namespace gl {
 
-        float my_color;
-        char buf[255];
-        float f = 0.5f;
+using zmesh::core::Mesh;
+
+class MeshWindowBuilder;
+
+enum class DrawMode {
+    Points, /* 点云 */
+    Wireframe, /* 线框 */
+    PhongShading, /*  */
+    PhongShadingWithWireframe, /* phong shading 加上线框 */
+    Texture /* 纹理 */
+};
+
 class MeshWindow : public BaseWindow {
 public:
-    MeshWindow() : BaseWindow(800, 600, "title") { }
-    ~MeshWindow() {
-        glfwTerminate();
-    }
-    void render() {
-        /* begin frame */
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+    friend class MeshWindowBuilder;
+    static MeshWindowBuilder create();
 
-        /* imgui */
-        ImGui::Begin("zmesh");
-        ImGui::Text("text");
-        ImGui::InputText("input text", buf, 255);
-        if (ImGui::Button("Save")) {
-            // do something
-            spdlog::info("width: {}, height: {}", width_, height_);
-            screenshot();
-        }
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+// private:
+    //! private constructor, 用builder去创建 mesh window
+    MeshWindow(int width, int height, const std::string& title);
 
-        // Edit a color stored as 4 floats
-        ImGui::ColorEdit4("Color", &my_color);
+public:
+    virtual ~MeshWindow();
 
-        // Generate samples and plot them
-        float samples[100];
-        for (int n = 0; n < 100; n++)
-            samples[n] = sinf(n * 0.2f + ImGui::GetTime() * 1.5f);
-        ImGui::PlotLines("Samples", samples, 100);
+    //! load mesh from obj
+    void load_mesh(const std::filesystem::path& path);
 
-        // Display contents in a scrolling region
-        ImGui::TextColored(ImVec4(1,1,0,1), "Important Stuff");
-        ImGui::BeginChild("Scrolling");
-        for (int n = 0; n < 50; n++)
-            ImGui::Text("%04d: Some text", n);
-        ImGui::EndChild();
+    //! save mesh to obj
+    //! @param filename 文件名字, 不需要后缀, 目前只会保存为obj文件
+    //! 默认保存到 ./models 目录下
+    void save_mesh(const std::string& filename);
 
-        ImGui::End();
+    virtual void render() override;
 
-        /* end frame */
-        glClearColor(0.9294f, 0.9098f, 0.9372f, 1.0f); // 237, 232, 239
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwPollEvents();
-        glfwSwapBuffers(glfw_window_);
-    }
+protected:
+    void begin_frame();
+    void draw_ui();
+    void draw_mesh();
+    void end_frame();
+
+protected:
+    Mesh mesh_;
 };
 
 }
