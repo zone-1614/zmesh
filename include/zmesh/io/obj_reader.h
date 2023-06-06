@@ -18,7 +18,7 @@ namespace io {
 class ObjReader : public BaseReader {
 public:
     bool read(Mesh& mesh, const std::filesystem::path& file, const io_options& options) {
-        spdlog::info("[ZMesh] read mesh from obj file");
+        spdlog::info("[ZMesh] read mesh from {}", std::filesystem::absolute(file).string());
         // TODO 现在不管options, 只读顶点和面
         std::ifstream ifs(file.string());
         std::string line;
