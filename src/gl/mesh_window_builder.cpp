@@ -20,6 +20,11 @@ MeshWindowBuilder& MeshWindowBuilder::height(int h) {
     return *this;
 }
 
+MeshWindowBuilder& MeshWindowBuilder::maximize() {
+    glfwMaximizeWindow(mesh_window_ptr_->glfw_window_);
+    return *this;
+}
+
 MeshWindowBuilder& MeshWindowBuilder::title(const std::string& t) {
     glfwSetWindowTitle(mesh_window_ptr_->glfw_window_, t.c_str());
     return *this;

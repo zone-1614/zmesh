@@ -10,8 +10,7 @@
 
 int main() {
     auto window_ptr = zmesh::MeshWindow::create()
-        .width(800)
-        .height(600)
+        .maximize()
         .title("zmesh window title")
         .mesh(std::filesystem::path("./models/Balls.obj"))
         .draw_mode(zmesh::DrawMode::Wireframe)

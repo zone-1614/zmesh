@@ -47,23 +47,35 @@ void MeshWindow::begin_frame() {
 }
 
 void MeshWindow::draw_ui() {
-    ImGui::Begin("zmesh");
-    ImGui::Text("text");
-    
-    if (ImGui::Button("screenshot")) {
-        screenshot();
+    // auto io = ImGui::GetIO();
+    // ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y));
+    // ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoTitleBar;
+    // window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_MenuBar;
+    ImGui::Begin("zmesh", &p_open_, window_flags);
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            ImGui::MenuItem("Open", NULL, &show_);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("View")) {
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Help")) {
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
     }
-    // Generate samples and plot them
-    float samples[100];
-    for (int n = 0; n < 100; n++)
-        samples[n] = sinf(n * 0.2f + ImGui::GetTime() * 1.5f);
-    ImGui::PlotLines("Samples", samples, 100);
 
-    // Display contents in a scrolling region
-    ImGui::TextColored(ImVec4(1,1,0,1), "Important Stuff");
-    ImGui::BeginChild("Scrolling");
-    for (int n = 0; n < 50; n++)
-        ImGui::Text("%04d: Some text", n);
+    ImGui::BeginChild("Log", ImVec2(200, 50));
+    ImGui::Text("aaaa");
+    // Get the size of the child (i.e. the whole draw size of the windows).
+    // ImVec2 wsize = ImGui::GetWindowSize();
+    // Because I use the texture from OpenGL, I need to invert the V from the UV.
+    // ImGui::Image((ImTextureID)0, wsize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::EndChild();
 
     ImGui::End();

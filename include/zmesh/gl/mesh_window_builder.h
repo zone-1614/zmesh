@@ -16,6 +16,8 @@ public:
 
     MeshWindowBuilder& height(int h);
 
+    MeshWindowBuilder& maximize();
+
     MeshWindowBuilder& title(const std::string& t);
 
     MeshWindowBuilder& mesh(const std::filesystem::path& path);
@@ -23,7 +25,7 @@ public:
     MeshWindowBuilder& draw_mode(DrawMode mode);
 
     std::unique_ptr<MeshWindow> pointer();
-    
+
 private:
     std::unique_ptr<MeshWindow> mesh_window_ptr_;
 };

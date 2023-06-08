@@ -63,6 +63,10 @@ protected:
 
 protected:
     Mesh mesh_;
+
+private:
+    bool p_open_{true};
+    bool show_{true};
 };
 
 }
