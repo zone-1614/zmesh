@@ -12,7 +12,7 @@ int main() {
     auto window_ptr = zmesh::MeshWindow::create()
         .maximize()
         .title("zmesh window title")
-        .mesh(std::filesystem::path("./models/Balls.obj"))
+        .mesh(std::filesystem::path("./models/cone.obj"))
         .draw_mode(zmesh::DrawMode::Wireframe)
         .pointer()
         ;

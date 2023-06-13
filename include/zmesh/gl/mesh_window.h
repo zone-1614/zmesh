@@ -9,6 +9,7 @@
 
 #include <zmesh/core/mesh.h>
 #include <zmesh/gl/base_window.h>
+#include <zmesh/gl/log_system.h>
 
 namespace zmesh {
 namespace gl {
@@ -57,16 +58,29 @@ public:
 
 protected:
     void begin_frame();
-    void draw_ui();
-    void draw_mesh();
+    void render_ui();
+    void render_mesh();
     void end_frame();
 
 protected:
     Mesh mesh_;
 
 private:
+    // imgui
     bool p_open_{true};
     bool show_{true};
+
+    char save_filename_[100] = "";
+    std::string current_filename_{"no file"};
+
+    // open gl
+    unsigned int vbo_;
+    unsigned int ebo_;
+    unsigned int vao_;
+    unsigned int texture;
+
+    // log system
+    LogSystem log_system_{};
 };
 
 }

@@ -11,7 +11,15 @@ using zmesh::io::write;
 
 MeshWindow::MeshWindow(int width, int height, const std::string& title)
     : BaseWindow(width, height, title) {
-    
+    glGenVertexArrays(1, &vao_);
+    glGenBuffers(1, &vbo_);
+    glGenBuffers(1, &ebo_);
+
+    glBindVertexArray(vao_);
+    auto points = mesh_.points();
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER, points.size() * 3 * sizeof(float), points.data(), GL_STATIC_DRAW);
+    glBindVertexArray(0);
 }
 
 MeshWindow::~MeshWindow() {
@@ -24,8 +32,8 @@ MeshWindowBuilder MeshWindow::create() {
 
 void MeshWindow::render() {
     begin_frame();
-    draw_ui();
-    draw_mesh();
+    render_ui();
+    render_mesh();
     end_frame();
 }
 
@@ -46,42 +54,38 @@ void MeshWindow::begin_frame() {
     ImGui::NewFrame();
 }
 
-void MeshWindow::draw_ui() {
-    // auto io = ImGui::GetIO();
-    // ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y));
-    // ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGuiWindowFlags window_flags = 0;
-    window_flags |= ImGuiWindowFlags_NoTitleBar;
-    // window_flags |= ImGuiWindowFlags_NoCollapse;
-    window_flags |= ImGuiWindowFlags_NoMove;
-    window_flags |= ImGuiWindowFlags_MenuBar;
-    ImGui::Begin("zmesh", &p_open_, window_flags);
-    if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            ImGui::MenuItem("Open", NULL, &show_);
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("View")) {
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Help")) {
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenuBar();
-    }
+void MeshWindow::render_ui() {
+    ImGui::Begin("Debug");
+    // if (ImGui::CollapsingHeader("Tools", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-    ImGui::BeginChild("Log", ImVec2(200, 50));
-    ImGui::Text("aaaa");
-    // Get the size of the child (i.e. the whole draw size of the windows).
-    // ImVec2 wsize = ImGui::GetWindowSize();
-    // Because I use the texture from OpenGL, I need to invert the V from the UV.
-    // ImGui::Image((ImTextureID)0, wsize, ImVec2(0, 1), ImVec2(1, 0));
-    ImGui::EndChild();
+        // 选择文件
+        ImGui::Text("Current file: %s", current_filename_.c_str());
+        if (ImGui::Button("select file")) {
+            // test log
+            spdlog::info("hhh");
+        }
 
+        ImGui::Spacing();
+
+        // 另存为
+        ImGui::InputText("filename", save_filename_, 100);
+        if (ImGui::Button("Save as")) {
+
+        }
+
+        ImGui::Spacing();
+
+        // 截图
+        if (ImGui::Button("Screenshot")) {
+            screenshot();
+        }
+    // }
     ImGui::End();
+    
+    log_system_.draw();
 }
 
-void MeshWindow::draw_mesh() {
+void MeshWindow::render_mesh() {
     
 }
 
