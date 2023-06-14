@@ -56,30 +56,28 @@ void MeshWindow::begin_frame() {
 
 void MeshWindow::render_ui() {
     ImGui::Begin("Debug");
-    // if (ImGui::CollapsingHeader("Tools", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-        // 选择文件
-        ImGui::Text("Current file: %s", current_filename_.c_str());
-        if (ImGui::Button("select file")) {
-            // test log
-            spdlog::info("hhh");
-        }
+    // 选择文件
+    ImGui::Text("Current file: %s", current_filename_.c_str());
+    if (ImGui::Button("select file")) {
+        // test log
+        spdlog::info("hhh");
+    }
 
-        ImGui::Spacing();
+    ImGui::Spacing();
 
-        // 另存为
-        ImGui::InputText("filename", save_filename_, 100);
-        if (ImGui::Button("Save as")) {
+    // 另存为
+    ImGui::InputText("filename", save_filename_, 100);
+    if (ImGui::Button("Save as")) {
 
-        }
+    }
 
-        ImGui::Spacing();
+    ImGui::Spacing();
 
-        // 截图
-        if (ImGui::Button("Screenshot")) {
-            screenshot();
-        }
-    // }
+    // 截图
+    if (ImGui::Button("Screenshot")) {
+        screenshot();
+    }
     ImGui::End();
     
     log_system_.draw();

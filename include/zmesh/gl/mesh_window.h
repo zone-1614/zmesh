@@ -66,7 +66,8 @@ protected:
     Mesh mesh_;
 
 private:
-    // imgui
+    // imgui 的参数 (在mesh window里才有imgui的参数而不是在base window里, 
+    // 这样设计是因为我觉得以后可能继承base window去做别的事, 而不需要加载一个文件)
     bool p_open_{true};
     bool show_{true};
 
@@ -78,9 +79,6 @@ private:
     unsigned int ebo_;
     unsigned int vao_;
     unsigned int texture;
-
-    // log system
-    LogSystem log_system_{};
 };
 
 }

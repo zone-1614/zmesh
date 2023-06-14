@@ -39,6 +39,7 @@ private:
     std::vector<std::string> logs_;
 };
 
+// 在log system的初始化中, 没有删除默认的sink, 所以控制台和imgui都可以看到日志
 class LogSystem {
 public:
     LogSystem();

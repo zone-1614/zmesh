@@ -16,6 +16,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <zmesh/gl/log_system.h>
+
 namespace zmesh {
 namespace gl {
 
@@ -108,6 +110,7 @@ protected:
     static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 protected:
+    // OpenGL 的参数
     int width_;
     int height_;
     std::string title_;
@@ -123,6 +126,9 @@ protected:
 
     // 是否按下鼠标
     std::array<bool, 8> button_pressed_{false};
+
+    // 日志系统
+    LogSystem log_system_{};
 };
 
 }

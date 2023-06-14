@@ -123,6 +123,10 @@ void BaseWindow::init_imgui_style() {
     // style.WindowFillAlphaDefault = 1.0f;
     style.FrameRounding = 4;
     style.IndentSpacing = 12.0f;
+    // 可以在这里设置字体, 没有暴露接口, 因为jetbrain这个字体好看
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* font = io.Fonts->AddFontFromFileTTF("./fonts/JetBrainsMono-Medium.ttf", 18.0f); // 第二个参数是字体大小
+    // ImGui::PushFont(font);
 }
 
 void BaseWindow::log_info() const {
