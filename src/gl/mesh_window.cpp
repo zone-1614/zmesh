@@ -20,6 +20,8 @@ MeshWindow::MeshWindow(int width, int height, const std::string& title)
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     glBufferData(GL_ARRAY_BUFFER, points.size() * 3 * sizeof(float), points.data(), GL_STATIC_DRAW);
     glBindVertexArray(0);
+
+    init_shader();
 }
 
 MeshWindow::~MeshWindow() {
@@ -94,6 +96,22 @@ void MeshWindow::end_frame() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwPollEvents();
     glfwSwapBuffers(glfw_window_);
+}
+
+// void MeshWindow::add_shader(std::shared_ptr<Shader> shader_ptr) {
+//     shaders_.push_back(shader_ptr);
+// }
+
+void MeshWindow::init_shader() {
+    // 默认添加几个常用的shader
+    // phong shading
+    shaders_.push_back(std::make_shared<Shader>(
+        "phong shader",
+        std::filesystem::path("./shaders/phong.vert"),
+        std::filesystem::path("./shaders/phong.frag")
+    ));
+
+    // TODO 或许还有其他的
 }
 
 }

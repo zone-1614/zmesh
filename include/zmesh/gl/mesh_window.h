@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -10,6 +11,7 @@
 #include <zmesh/core/mesh.h>
 #include <zmesh/gl/base_window.h>
 #include <zmesh/gl/log_system.h>
+#include <zmesh/gl/shader.h>
 
 namespace zmesh {
 namespace gl {
@@ -62,6 +64,10 @@ protected:
     void render_mesh();
     void end_frame();
 
+private:
+    void init_shader();
+//     void add_shader(std::shared_ptr<Shader> shader_ptr);
+
 protected:
     Mesh mesh_;
 
@@ -79,6 +85,13 @@ private:
     unsigned int ebo_;
     unsigned int vao_;
     unsigned int texture;
+
+    // log system
+    LogSystem log_system_{};
+
+    // 可选的shader
+    // TODO: 默认有几个shader, 用户可以通过builder的shader函数添加
+    std::vector<std::shared_ptr<Shader>> shaders_;
 };
 
 }

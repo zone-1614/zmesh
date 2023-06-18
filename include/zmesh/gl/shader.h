@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <filesystem>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -19,10 +20,10 @@ class Shader {
 public:
     Shader(
         const std::string& name, 
-        const std::string& vertex_path, 
-        const std::string& frag_path
+        const std::filesystem::path& vertex_path, 
+        const std::filesystem::path& frag_path
     ) : name_(name) {
-        std::ifstream vf(vertex_path), ff(frag_path);
+        std::ifstream vf(vertex_path.string()), ff(frag_path.string());
         std::stringstream vss, fss;
         vss << vf.rdbuf();
         fss << ff.rdbuf();

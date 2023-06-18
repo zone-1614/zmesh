@@ -1,5 +1,7 @@
 #include <zmesh/gl/mesh_window_builder.h>
 
+#include <zmesh/gl/shader.h>
+
 namespace zmesh {
 namespace gl {
 
@@ -38,6 +40,26 @@ MeshWindowBuilder& MeshWindowBuilder::mesh(const std::filesystem::path& path) {
 MeshWindowBuilder& MeshWindowBuilder::draw_mode(DrawMode mode) {
     // TODO
     return *this;
+}
+
+MeshWindowBuilder& MeshWindowBuilder::shader(
+    const std::string& name, 
+    const std::filesystem::path& vpath, 
+    const std::filesystem::path& fpath
+) {
+    auto shader = std::make_shared<Shader>(name, vpath, fpath);
+    mesh_window_ptr_->shaders_.push_back(shader);
+    return *this;
+}
+
+MeshWindowBuilder& MeshWindowBuilder::shader(
+    const std::string& name, 
+    const std::string& vpath, 
+    const std::string& fpath
+) {
+    std::filesystem::path vpath_(vpath);
+    std::filesystem::path fpath_(fpath);
+    return shader(name, vpath_, fpath_);
 }
 
 std::unique_ptr<MeshWindow> MeshWindowBuilder::pointer() {
