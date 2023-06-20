@@ -54,7 +54,7 @@ SmartVertexHandle Mesh::add_vertex(const Point& p) {
     return make_smart(v, this);
 }
 
-SmartVertexHandle Mesh::add_vertex(double x, double y, double z) {
+SmartVertexHandle Mesh::add_vertex(float x, float y, float z) {
     auto v = new_vertex();
     Point p{x, y, z};
     vpoints_[v] = p;

@@ -63,7 +63,7 @@ public:
     SmartVertexHandle add_vertex(const Point& p);
 
     //! 添加一个顶点, 同时赋予其坐标
-    SmartVertexHandle add_vertex(double x, double y, double z);
+    SmartVertexHandle add_vertex(float x, float y, float z);
 
     //! 通过参数传入的顶点, 添加一个面
     SmartFaceHandle add_face(const std::vector<VertexHandle>& vertices);

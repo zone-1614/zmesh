@@ -49,12 +49,6 @@ public:
     const Point& point() const;
 
     // SmartHandle只访问数据, 操作数据相关的函数只能用Mesh本身
-    // Returns the reference point of vertex
-    // Point& point();
-
-    // void set_point(const Point& p);
-
-    // void set_point(double x, double y, double z);
 
     //! 返回一条outgoing halfedge
     SmartHalfedgeHandle halfedge() const;
