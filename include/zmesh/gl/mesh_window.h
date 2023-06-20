@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 
 #include <zmesh/core/mesh.h>
-#include <zmesh/gl/base_window.h>
+#include <zmesh/gl/arcball_window.h>
 #include <zmesh/gl/log_system.h>
 #include <zmesh/gl/shader.h>
 
@@ -21,15 +21,7 @@ using zmesh::core::Mesh;
 
 class MeshWindowBuilder;
 
-enum class DrawMode {
-    Points, /* 点云 */
-    Wireframe, /* 线框 */
-    PhongShading, /*  */
-    PhongShadingWithWireframe, /* phong shading 加上线框 */
-    Texture /* 纹理 */
-};
-
-class MeshWindow : public BaseWindow {
+class MeshWindow : public ArcballWindow {
 public:
     friend class MeshWindowBuilder;
     static MeshWindowBuilder create();
@@ -57,7 +49,7 @@ public:
     //! 默认保存到 ./models 目录下
     void save_mesh(const std::string& filename);
 
-    virtual void render() override;
+    virtual void update() override;
 
     void update_mesh();
 

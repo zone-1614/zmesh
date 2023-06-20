@@ -11,7 +11,7 @@ using zmesh::io::read;
 using zmesh::io::write;
 
 MeshWindow::MeshWindow(int width, int height, const std::string& title)
-    : BaseWindow(width, height, title) {
+    : ArcballWindow(width, height, title) {
 
     init_shader();
 }
@@ -24,7 +24,7 @@ MeshWindowBuilder MeshWindow::create() {
     return MeshWindowBuilder{};
 }
 
-void MeshWindow::render() {
+void MeshWindow::update() {
     begin_frame();
     render_ui();
     render_mesh();
@@ -82,6 +82,8 @@ void MeshWindow::render_ui() {
     if (ImGui::Button("select file")) {
         // test log
         spdlog::info("hhh");
+        auto [a, b] = cursor_pos();
+        spdlog::info("{}, {}", a, b);
     }
 
     ImGui::Spacing();

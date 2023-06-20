@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <zmesh/gl/base_window.h>
 
@@ -38,6 +39,9 @@ public:
     void view_all();
 
 protected:
+    virtual void update() override;
+
+protected:
     virtual void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
     virtual void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
@@ -47,37 +51,24 @@ protected:
     virtual void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 protected:
-    virtual void draw() = 0;
-
-    void rotation(int x, int y);
-
-    void translation(int x, int y);
-
-    void zoom(int x, int y);
-
-    void fly_to(int x, int y);
-
-    void translate(const glm::vec3& trans);
-
-    void rotate(const glm::vec3& axis, float angle);
-
-    bool map_to_sphere(const glm::ivec2& point, glm::vec3& result);
+    
 
 protected:
     DrawMode draw_mode_;
     
-    glm::vec3 center_;
-    float radius_;
+    bool arcball_enabled_{false}; //!< 按住左键就可以启用trackball
+    float radius_{6.0f}; //!< arcball 的半径
+    glm::vec2 last_; //!< 上一次鼠标点到的位置
 
-    float near_, far_, fovy_;
+    // 相机参数
+    glm::vec3 eye_{0, 0, 1};
+    glm::vec3 center_{0, 0, 0};
+    glm::vec3 up_{0, 1, 0};
 
-    glm::mat4 M;
-    glm::mat4 V;
-    glm::mat4 P;
-
-    glm::ivec2 last_point_2d_;
-    glm::vec3 last_point_3d_;
-    bool last_point_ok_;
+    // MVP矩阵
+    // glm::mat4 M = glm::mat4(1.0f);
+    glm::mat4 V = glm::translate(glm::mat4(1), glm::vec3(0, 0, -radius_));
+    // glm::mat4 P = glm::perspective();
 };
 
 }

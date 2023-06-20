@@ -31,14 +31,14 @@ public:
     void run();
 
 protected:
-    virtual void render() = 0;
+    virtual void update() = 0;
 
     virtual void init_imgui_style();
 
-    void log_info() const;
-
 private:
     void init_callbacks();
+
+    void log_opengl_info();
 
 public:
     //! get the width of window

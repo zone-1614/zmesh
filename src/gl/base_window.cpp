@@ -61,13 +61,13 @@ BaseWindow::BaseWindow(int width, int height, const std::string& title)
 
     init_callbacks();
 
-    log_info();
+    log_opengl_info();
 }
 
 void BaseWindow::run() {
     init_imgui_style();
     while (!glfwWindowShouldClose(glfw_window_)) {
-        render();
+        update();
     }
 }
 
@@ -129,7 +129,7 @@ void BaseWindow::init_imgui_style() {
     // ImGui::PushFont(font);
 }
 
-void BaseWindow::log_info() const {
+void BaseWindow::log_opengl_info() {
     std::stringstream log_info_ss;
     log_info_ss << glGetString(GL_VENDOR);
     spdlog::info("OpenGL Vendor: {}", log_info_ss.str());
