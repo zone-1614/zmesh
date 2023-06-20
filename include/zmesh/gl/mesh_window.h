@@ -7,6 +7,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <spdlog/spdlog.h>
+#include <glm/glm.hpp>
 
 #include <zmesh/core/mesh.h>
 #include <zmesh/gl/base_window.h>
@@ -58,6 +59,8 @@ public:
 
     virtual void render() override;
 
+    void update_mesh();
+
 protected:
     void begin_frame();
     void render_ui();
@@ -81,10 +84,13 @@ private:
     std::string current_filename_{"no file"};
 
     // open gl
-    unsigned int vbo_;
-    unsigned int ebo_;
-    unsigned int vao_;
-    unsigned int texture;
+    unsigned int vbo_{0};
+    unsigned int ebo_{0};
+    unsigned int vao_{0};
+    unsigned int vertex_normal_buffer_{0};
+    unsigned int tex_coord_buffer_{0};
+    unsigned int texture_{0};
+
 
     // log system
     LogSystem log_system_{};
@@ -92,6 +98,17 @@ private:
     // 可选的shader
     // TODO: 默认有几个shader, 用户可以通过builder的shader函数添加
     std::vector<std::shared_ptr<Shader>> shaders_;
+    std::shared_ptr<Shader> current_shader_;
+
+    float point_size_{5.0f}; // 用于画点云的点大小
+    float ambient_{0.1f};
+    float diffuse_{0.8f};
+    float specular_{0.6f};
+    glm::vec3 light_pos_{1.0f, 1.0f, 1.0f};
+    glm::vec3 light_color_{1.0f, 1.0f, 1.0f};
+    glm::vec3 object_color_{0.3f, 0.4f, 0.7f};
+    glm::vec3 view_pos_{1.0f, 0.0f, 0.0f};
+
 };
 
 }

@@ -396,21 +396,23 @@ protected:
     Index n_deleted_vertices_{0};
     Index n_deleted_edges_{0};
     Index n_deleted_faces_{0};
+};
 
-private:
-    // helper for property name 
-    class PropertyNames {
-    public:
-        // this feature need c++17
-        inline static const std::string vpoints_{"zmesh-vpoints_"};
-        inline static const std::string vertices_{"zmesh-vertices_"};
-        inline static const std::string edges_{"zmesh-edges_"};
-        inline static const std::string halfedges_{"zmesh-halfedges_"};
-        inline static const std::string faces_{"zmesh-faces_"};
-        inline static const std::string v_deleted_bits_{"zmesh-v_deleted_bits_"};
-        inline static const std::string e_deleted_bits_{"zmesh-e_deleted_bits_"};
-        inline static const std::string f_deleted_bits_{"zmesh-f_deleted_bits_"};
-    };
+// helper for property name 
+class PropertyNames {
+public:
+    // this feature need c++17
+    inline static const std::string vpoints_{"zmesh-vpoints_"};
+    inline static const std::string vertices_{"zmesh-vertices_"};
+    inline static const std::string edges_{"zmesh-edges_"};
+    inline static const std::string halfedges_{"zmesh-halfedges_"};
+    inline static const std::string faces_{"zmesh-faces_"};
+    inline static const std::string v_deleted_bits_{"zmesh-v_deleted_bits_"};
+    inline static const std::string e_deleted_bits_{"zmesh-e_deleted_bits_"};
+    inline static const std::string f_deleted_bits_{"zmesh-f_deleted_bits_"};
+
+    inline static const std::string vnormals{"zmesh-vnormals"};
+    inline static const std::string fnormals{"zmesh-fnormals"};
 };
 
 }
