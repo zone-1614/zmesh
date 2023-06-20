@@ -27,7 +27,7 @@ class BaseWindow {
 public: 
     //! 构造函数
     BaseWindow(int width, int height, const std::string& title = "");
-    virtual ~BaseWindow() {}
+    virtual ~BaseWindow() = default;
     void run();
 
 protected:
@@ -71,26 +71,34 @@ public:
     //! press right alt?
     bool right_alt_pressed() const;
 
+    bool left_mouse_pressed() const;
+
+    bool middle_mouse_pressed() const;
+
+    bool right_mouse_pressed() const;
+
     //! 截图
     void screenshot();
 
 protected:
     // callback functions
-    virtual void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {}
+    virtual void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) { }
 
-    virtual void character_callback(GLFWwindow* window, unsigned int codepoint) {}
+    virtual void character_callback(GLFWwindow* window, unsigned int codepoint) { }
 
-    virtual void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {}
+    virtual void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) { }
 
-    virtual void cursor_enter_callback(GLFWwindow* window, int entered) {}
+    virtual void cursor_enter_callback(GLFWwindow* window, int entered) { }
 
-    virtual void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {}
+    virtual void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) { }
 
-    virtual void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {}
+    virtual void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) { }
 
-    virtual void drop_callback(GLFWwindow* window, int count, const char** paths) {}
+    virtual void drop_callback(GLFWwindow* window, int count, const char** paths) { }
 
-    virtual void framebuffer_size_callback(GLFWwindow* window, int width, int height) {}
+    virtual void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+        glViewport(0, 0, width, height);
+    }
 
     // static callback functions
     static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

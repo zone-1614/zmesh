@@ -186,6 +186,18 @@ bool BaseWindow::right_alt_pressed() const {
     return right_alt_pressed_;
 }
 
+bool BaseWindow::left_mouse_pressed() const {
+    return button_pressed_[GLFW_MOUSE_BUTTON_LEFT];
+}
+
+bool BaseWindow::middle_mouse_pressed() const {
+    return button_pressed_[GLFW_MOUSE_BUTTON_MIDDLE];
+}
+
+bool BaseWindow::right_mouse_pressed() const {
+    return button_pressed_[GLFW_MOUSE_BUTTON_RIGHT];
+}
+
 void BaseWindow::screenshot() {
     // 不存在则创建screenshot目录
     std::filesystem::create_directory("./screenshot");
