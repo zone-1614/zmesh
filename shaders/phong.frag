@@ -27,6 +27,6 @@ void main() {
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
     vec3 specular_ = specular * spec * light_color;
 
-    vec3 all = ambient_ + diffuse_ + specular_;
-    frag_color = vec4(all, 1.0);
+    vec3 all_color = ambient_ + diffuse_ + specular_;
+    frag_color = vec4(all_color, 1.0);
 }
