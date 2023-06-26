@@ -1,9 +1,13 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <memory>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include <zmesh/gl/shader.h>
 
 namespace zmesh {
 namespace gl {
@@ -27,7 +31,9 @@ private:
     std::string title_;
     GLFWwindow* glfw_window_;
 
-    unsigned int shaderProgram;
+    // std::vector<Shader> shaders_;
+    std::shared_ptr<Shader> shader_;
+
     unsigned int VAO;
 };
 
