@@ -1,27 +1,26 @@
 #include <zmesh/gl/mesh_window.h>
 
+#include <exception>
+
 #include <spdlog/spdlog.h>
 
-#include <exception>
+#include <zmesh/io/io.h>
 
 namespace zmesh {
 namespace gl {
 
-float vertices[] = {
-        0.5f,  0.5f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left 
-};
-unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,  // first Triangle
-    1, 2, 3   // second Triangle
-};
-    int success;
-    char infoLog[512];
-    unsigned int VBO, EBO;
-MeshWindow::MeshWindow(int width, int height, std::string title)
-    : width_(width), height_(height), title_(title) {
+int success;
+char infoLog[512];
+unsigned int VBO, EBO;
+MeshWindow::MeshWindow(
+    int width, 
+    int height, 
+    std::string title, 
+    std::filesystem::path mesh_path
+) : width_(width), height_(height), title_(title) {
+
+    io::read(mesh_, mesh_path);
+
     glfwInit();
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -34,29 +33,46 @@ MeshWindow::MeshWindow(int width, int height, std::string title)
     }
     glfwMakeContextCurrent(glfw_window_);
     glfwSetWindowUserPointer(glfw_window_, this); // 构造函数执行完毕之前暴露this指针不安全, 有没有更好的做法?
+    // init callbacks
+    glfwSetFramebufferSizeCallback(glfw_window_, MeshWindow::framebuffer_size_callback);
+    glfwSetKeyCallback(glfw_window_, MeshWindow::key_callback);
+    glfwSetCursorPosCallback(glfw_window_, MeshWindow::cursor_pos_callback);
+    glfwSetMouseButtonCallback(glfw_window_, MeshWindow::mouse_button_callback);
+    glfwSetScrollCallback(glfw_window_, MeshWindow::scroll_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error("glad init failed");
     }
     
     shader_ = std::make_shared<Shader>(
-        std::filesystem::path("./shaders/test.vert"),
-        std::filesystem::path("./shaders/test.frag"));
+        std::filesystem::path("./shaders/phong.vert"),
+        std::filesystem::path("./shaders/phong.frag")
+    );
+    camera_ = std::make_shared<TrackballCamera>();
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
     glBindVertexArray(VAO);
 
+    auto vertices = mesh_.points();
+    std::vector<unsigned int> indices;
+    indices.reserve(mesh_.n_faces() * 3);
+    for (auto f : mesh_.faces()) {
+        for (auto v : f.vertices()) {
+            indices.push_back(v.idx());
+        }
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
@@ -75,11 +91,69 @@ void MeshWindow::mainloop() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader_->use();
+    auto P = glm::perspective(glm::radians(camera_->get_zoom()), (float) width_/(float) height_, 0.1f, 100.0f);
+    auto V = camera_->get_view_matrix();
+    shader_->set_mat4("P", P);
+    shader_->set_mat4("V", V);
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    unsigned int n_indices_ = mesh_.n_faces() * 3;
+    glDrawElements(GL_TRIANGLES, n_indices_, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(glfw_window_);
     glfwPollEvents();
+}
+
+void MeshWindow::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    mesh_window->width_ = width;
+    mesh_window->height_ = height;
+    glViewport(0, 0, width, height);
+}
+
+void MeshWindow::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    switch (key) {
+        case GLFW_KEY_ESCAPE:
+            glfwSetWindowShouldClose(mesh_window->glfw_window_, GLFW_TRUE);
+            break;
+        case GLFW_KEY_LEFT_SHIFT:
+            mesh_window->left_shift_pressed_ = (action != GLFW_RELEASE);
+            spdlog::info("{}", mesh_window->left_shift_pressed_);
+            break;
+        case GLFW_KEY_LEFT_CONTROL:
+            mesh_window->left_ctrl_pressed_ = (action != GLFW_RELEASE);
+            break;
+        case GLFW_KEY_LEFT_ALT:
+            mesh_window->left_alt_pressed_ = (action != GLFW_RELEASE);
+            break;
+    }
+}
+
+void MeshWindow::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
+    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    if (mesh_window->enable_trackball_) {
+        mesh_window->camera_->update(xpos, ypos, mesh_window->width_, mesh_window->height_);
+    }
+}
+
+void MeshWindow::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    mesh_window->mouse_button_pressed_[button] = (action != GLFW_RELEASE);
+
+    // 按下鼠标左键开启trackball
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        auto [x, y] = mesh_window->cursor_pos();
+        mesh_window->camera_->set_last(x, y);
+        mesh_window->enable_trackball_ = true;
+    }
+    // 松开鼠标左键关闭trackball
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        mesh_window->enable_trackball_ = false;
+    }
+}
+
+void MeshWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+
 }
 
 }
