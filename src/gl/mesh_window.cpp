@@ -1,5 +1,7 @@
 #include <zmesh/gl/mesh_window.h>
 
+#include <zmesh/algo/bbox.h>
+
 #include <exception>
 
 #include <spdlog/spdlog.h>
@@ -45,7 +47,11 @@ MeshWindow::MeshWindow(
         std::filesystem::path("./shaders/phong.vert"),
         std::filesystem::path("./shaders/phong.frag")
     );
-    camera_ = std::make_shared<TrackballCamera>();
+
+    // 利用bbox计算一开始相机的位置
+    auto [_, bbmax] = algo::bounding_box(mesh_);
+    auto radius = std::max({ bbmax[0], bbmax[1], bbmax[2] }) * 3.0f; // 数值为最大的一个坐标乘以3
+    camera_ = std::make_shared<TrackballCamera>(glm::vec3(0, 0, radius));
     camera_->set_width(width);
     camera_->set_height(height);
 
@@ -97,6 +103,7 @@ void MeshWindow::mainloop() {
     glBindVertexArray(VAO);
     unsigned int n_indices_ = mesh_.n_faces() * 3;
     glDrawElements(GL_TRIANGLES, n_indices_, GL_UNSIGNED_INT, 0);
+    // glDrawElements(GL_LINES, n_indices_, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(glfw_window_);
     glfwPollEvents();
