@@ -1,3 +1,13 @@
+/**
+ * @file shader.h
+ * @author zone-1614 (you@domain.com)
+ * @brief 着色器类, 只有vertex shader和fragment shader
+ * @version 0.1
+ * @date 2023-06-28
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 
 #include <string>
@@ -37,8 +47,6 @@ public:
         ff.close();
         auto vstr = vss.str(), fstr = fss.str();
         const char* vcstr = vstr.c_str(), *fcstr = fstr.c_str();
-        // const char* v_cstr = vss.str().c_str();
-        // const char* f_cstr = fss.str().c_str();
 
         unsigned int vs, fs;
         int success;

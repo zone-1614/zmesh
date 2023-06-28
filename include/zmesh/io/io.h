@@ -1,3 +1,13 @@
+/**
+ * @file io.h
+ * @author zone-1614 (you@domain.com)
+ * @brief io函数
+ * @version 0.1
+ * @date 2023-06-28
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 #include <filesystem>
 

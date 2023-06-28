@@ -9,11 +9,13 @@ static std::vector<BaseReader*> readers {
     new ObjReader()
 };
 
+//! 根据文件路径读mesh
 bool read(Mesh& mesh, const std::filesystem::path& file) {
     io_options options;
     return read(mesh, file, options);
 }
 
+//! 根据文件路径和io option读mesh
 bool read(Mesh& mesh, const std::filesystem::path& file, const io_options& options) {
     mesh.clear();
 
@@ -27,18 +29,6 @@ bool read(Mesh& mesh, const std::filesystem::path& file, const io_options& optio
     }
     return false;
 }
-
-// void read_obj(Mesh& mesh, const std::filesystem::path& file, const io_options& options) {
-//     // TODO 当前版本不管option, 只读顶点和面
-//     // ObjReader reader(mesh, file, options);
-//     // reader.read();
-// }
-
-// void read_off(Mesh& mesh, const std::filesystem::path& file, const io_options& options) {
-//     // TODO 当前版本不管option, 只读顶点和面
-//     // ObjReader reader(mesh, file, options);
-//     // reader.read();
-// }
 
 }
 }

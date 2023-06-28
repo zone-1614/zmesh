@@ -1,3 +1,14 @@
+/**
+ * @file trackball_camera.h
+ * @author zone-1614 (you@domain.com)
+ * @brief trackball camera
+ * trackball就是类似三维建模软件(blender)中的那种相机, 也叫arcball
+ * @version 0.1
+ * @date 2023-06-28
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 
 #include <glm/glm.hpp>

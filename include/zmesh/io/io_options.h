@@ -1,3 +1,13 @@
+/**
+ * @file io_options.h
+ * @author zone-1614 (you@domain.com)
+ * @brief 控制io选项
+ * @version 0.1
+ * @date 2023-06-28
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 
 namespace zmesh {
