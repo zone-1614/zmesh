@@ -61,7 +61,6 @@ public:
         const auto cos_theta = std::abs(glm::dot(view_dir, up_));
         auto theta = std::acos(cos_theta); // 弧度
         theta = theta * 180.0f / M_PI; // 转为角度
-        spdlog::info(theta);
 
         if (theta > 10.0f) {
             // 更新 position_
