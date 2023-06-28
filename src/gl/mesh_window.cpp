@@ -9,9 +9,6 @@
 namespace zmesh {
 namespace gl {
 
-int success;
-char infoLog[512];
-unsigned int VBO, EBO;
 MeshWindow::MeshWindow(
     int width, 
     int height, 
@@ -49,6 +46,8 @@ MeshWindow::MeshWindow(
         std::filesystem::path("./shaders/phong.frag")
     );
     camera_ = std::make_shared<TrackballCamera>();
+    camera_->set_width(width);
+    camera_->set_height(height);
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -87,11 +86,11 @@ void MeshWindow::run() {
 }
 
 void MeshWindow::mainloop() {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.9294f, 0.9098f, 0.9372f, 1.0f); // RGB: 237, 232, 239
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader_->use();
-    auto P = glm::perspective(glm::radians(camera_->get_zoom()), (float) width_/(float) height_, 0.1f, 100.0f);
+    auto P = camera_->get_projection_matrix();
     auto V = camera_->get_view_matrix();
     shader_->set_mat4("P", P);
     shader_->set_mat4("V", V);
@@ -107,6 +106,8 @@ void MeshWindow::framebuffer_size_callback(GLFWwindow* window, int width, int he
     MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
     mesh_window->width_ = width;
     mesh_window->height_ = height;
+    mesh_window->camera_->set_width(width);
+    mesh_window->camera_->set_height(height);
     glViewport(0, 0, width, height);
 }
 
@@ -118,7 +119,6 @@ void MeshWindow::key_callback(GLFWwindow* window, int key, int scancode, int act
             break;
         case GLFW_KEY_LEFT_SHIFT:
             mesh_window->left_shift_pressed_ = (action != GLFW_RELEASE);
-            spdlog::info("{}", mesh_window->left_shift_pressed_);
             break;
         case GLFW_KEY_LEFT_CONTROL:
             mesh_window->left_ctrl_pressed_ = (action != GLFW_RELEASE);
@@ -132,7 +132,7 @@ void MeshWindow::key_callback(GLFWwindow* window, int key, int scancode, int act
 void MeshWindow::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
     MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
     if (mesh_window->enable_trackball_) {
-        mesh_window->camera_->update(xpos, ypos, mesh_window->width_, mesh_window->height_);
+        mesh_window->camera_->update(xpos, ypos);
     }
 }
 
@@ -153,7 +153,8 @@ void MeshWindow::mouse_button_callback(GLFWwindow* window, int button, int actio
 }
 
 void MeshWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-
+    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    mesh_window->camera_->scroll(yoffset);
 }
 
 }

@@ -17,7 +17,7 @@ void main() {
     // gl_PointSize = point_size;
     // gl_Position = P * V * vec4(frag_pos, 1.0);
     // vec4 temp = P * V * vec4(in_pos, 1.0f);
-    vec4 temp = V * vec4(in_pos, 1.0f);
+    vec4 temp = P * V * vec4(in_pos, 1.0f);
 
     // frag_pos = vec3(temp);
     gl_Position = temp;
