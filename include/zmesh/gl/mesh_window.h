@@ -109,16 +109,28 @@ private:
 
     core::Mesh mesh_;
 
-    // std::vector<Shader> shaders_;
-    std::shared_ptr<Shader> shader_;
     // shader使用智能指针是因为创建shader之前需要初始化glad之类的, 而shader又不提供默认构造
-    // camera其实不需要用智能指针, 只是为了长的像
+    // camera其实不需要用智能指针, 只是为了形式和shader看起来一样
     bool enable_trackball_{false}; //!< 是否开启trackball
     std::shared_ptr<TrackballCamera> camera_;
 
-    unsigned int VAO;
-    unsigned int VBO;
-    unsigned int EBO;
+    // shader相关
+    std::shared_ptr<Shader> shader_;
+    float ambient_{0.1f};
+    float diffuse_{0.9f};
+    float specular_{0.8f};
+    glm::vec3 light_color_{1.0f, 1.0f, 1.0f};
+    glm::vec3 object_color_{0.910f, 0.490f, 0.051f}; // rgb: 232, 125, 13
+
+    // opengl 相关
+    unsigned int vao_; //!< vertex array object
+    unsigned int vertex_buffer_; //!< 顶点坐标
+    unsigned int febo_; //!< face element buffer object 
+    unsigned int eebo_; //!< edge element buffer object 
+
+    unsigned int normal_buffer_; //!< 顶点法向, 也是一个vbo
+
+    float point_size_{6.0f}; //!< OpenGL的点大小, 建议在 5.0 到 8.0之间
 };
 
 }

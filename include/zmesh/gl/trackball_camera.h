@@ -36,6 +36,8 @@ public:
     glm::mat4 get_view_matrix() { return glm::lookAt(position_, lookat_, up_); }
 
     float get_zoom() { return zoom_; }
+
+    glm::vec3 get_position() { return position_; }
     
     //! @param xpos 当前x坐标
     //! @param ypos 当前y坐标

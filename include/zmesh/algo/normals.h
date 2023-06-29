@@ -50,7 +50,10 @@ core::Normal vertex_normal(core::Mesh& mesh, core::VertexHandle& v) {
     auto fnormals = face_normals(mesh);
     core::Normal sum{0.0f, 0.0f, 0.0f}; // 邻域法向之和
     for (auto f : mesh.faces(v)) {
+        if (!f.is_valid()) continue;
+        // if (f.is_boundary()) continue;
         sum += fnormals[f];
+        spdlog::info("valid");
     }
     return sum.normalized();
 }
@@ -58,6 +61,7 @@ core::Normal vertex_normal(core::Mesh& mesh, core::VertexHandle& v) {
 core::VertexPropertyHandle<core::Normal> vertex_normals(core::Mesh& mesh) {
     auto vnormals = mesh.get_or_add_vertex_property<core::Normal>(core::PropertyNames::vnormals);
     for (auto v : mesh.vertices()) {
+        spdlog::info("hehe");
         vnormals[v] = vertex_normal(mesh, v);
     }
     return vnormals;
