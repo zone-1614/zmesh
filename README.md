@@ -16,7 +16,7 @@ ZMesh目前只是一套数据结构, 后续会添加可视化之类的功能和�
   * [ ] OffWriter
   * [ ] 其他3D文件的 Reader 和 Writer
 * gl: OpenGL相关
-  * [x] Mesh可视化 (由于还没实现法向相关的算法, 暂时没实现phong shading)
+  * [x] Mesh可视化
   * UI
     * [ ] log
     * [ ] file
