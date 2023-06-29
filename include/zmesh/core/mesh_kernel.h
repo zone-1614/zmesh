@@ -359,7 +359,7 @@ public:
 
     //! 设置半边相接的面
     void set_face(HalfedgeHandle h, FaceHandle f) {
-        faces_[f].halfedge_ = h;
+        halfedges_[h].face_ = f;
     }
 
     //! 判断面是不是边界

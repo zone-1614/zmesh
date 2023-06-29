@@ -191,6 +191,7 @@ SmartFaceHandle Mesh::add_face(const std::vector<VertexHandle>& vertices) {
         } else {
             _need_adjust[j] = (halfedge(v) == inner_next);
         }
+        set_face(_halfedges[i], f);
     }
 
     for (auto [h0, h1] : _next_cache) {
