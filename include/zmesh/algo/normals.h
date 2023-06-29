@@ -23,8 +23,6 @@ namespace algo {
 //! 定点顺序顺时针代表正面
 //! 只适用于三角网格
 core::Normal face_normal(core::Mesh& mesh, core::FaceHandle& f) {
-    if (!mesh.is_triangle_mesh()) return core::Normal(1, 1, 1);
-
     // 面周围的三个点
     std::vector<core::Point> points;
     for (auto v : mesh.vertices(f)) {
@@ -33,8 +31,14 @@ core::Normal face_normal(core::Mesh& mesh, core::FaceHandle& f) {
 
     auto e02 = points[2] - points[0]; // edge from point 0 to point 2
     auto e01 = points[1] - points[0]; // edge from point 0 to point 1
-    
-    return e02.cross(e01).normalized();
+
+    // 叉乘, 以后提取为常用函数
+    // auto n = core::Normal(
+    //     e02[1] * e01[2] - e02[2] * e01[1],
+    //     e02[2] * e01[0] - e02[0] * e01[2],
+    //     e02[0] * e01[1] - e02[1] * e01[0]
+    // ); 
+    return e01.cross(e02).normalized();
 }
 
 core::FacePropertyHandle<core::Normal> face_normals(core::Mesh& mesh) {
@@ -51,9 +55,7 @@ core::Normal vertex_normal(core::Mesh& mesh, core::VertexHandle& v) {
     core::Normal sum{0.0f, 0.0f, 0.0f}; // 邻域法向之和
     for (auto f : mesh.faces(v)) {
         if (!f.is_valid()) continue;
-        // if (f.is_boundary()) continue;
         sum += fnormals[f];
-        spdlog::info("valid");
     }
     return sum.normalized();
 }
@@ -61,7 +63,6 @@ core::Normal vertex_normal(core::Mesh& mesh, core::VertexHandle& v) {
 core::VertexPropertyHandle<core::Normal> vertex_normals(core::Mesh& mesh) {
     auto vnormals = mesh.get_or_add_vertex_property<core::Normal>(core::PropertyNames::vnormals);
     for (auto v : mesh.vertices()) {
-        spdlog::info("hehe");
         vnormals[v] = vertex_normal(mesh, v);
     }
     return vnormals;

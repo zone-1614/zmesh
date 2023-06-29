@@ -12,6 +12,7 @@ uniform mat4 P;
 uniform float point_size;
 
 void main() {
+    normal = in_normal;
     gl_PointSize = point_size;
     vec4 pos = P * V * vec4(in_pos, 1.0f);
     frag_pos = vec3(pos);
