@@ -18,10 +18,15 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <spdlog/spdlog.h>
 
 #include <zmesh/gl/shader.h>
 #include <zmesh/gl/trackball_camera.h>
 #include <zmesh/core/mesh.h>
+#include <zmesh/gl/log_window.h>
 
 namespace zmesh {
 namespace gl {
@@ -86,6 +91,9 @@ protected:
 
     //! 是否按下鼠标右键
     bool right_mouse_button_pressed() { return mouse_button_pressed_[GLFW_MOUSE_BUTTON_RIGHT]; }
+
+    //! 初始化imgui的样式
+    void init_imgui_style();
 
     //! 截图
     void screenshot();
@@ -167,6 +175,9 @@ private:
     float point_size_{6.0f}; //!< OpenGL的点大小, 建议在 5.0 到 8.0之间
 
     int draw_mode_{DrawMode::Points | DrawMode::WireFrame | DrawMode::PhongShading};
+
+    // ui
+    LogWindow log_window_;
 };
 
 }
