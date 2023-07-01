@@ -31,12 +31,13 @@ public:
         radius_(radius)
     {}
 
+    //! 返回投影矩阵
     glm::mat4 get_projection_matrix() { return glm::perspective(glm::radians(zoom_), (float)width_ / (float)height_, near_, far_); }
 
+    //! 返回view矩阵
     glm::mat4 get_view_matrix() { return glm::lookAt(position_, lookat_, up_); }
 
-    float get_zoom() { return zoom_; }
-
+    //! 返回相机位置
     glm::vec3 get_position() { return position_; }
     
     //! @param xpos 当前x坐标
@@ -96,35 +97,38 @@ public:
         }
     }
 
+    //! 设置上一帧的位置
     void set_last(double x, double y) {
         last_.x = static_cast<float>(x);
         last_.y = static_cast<float>(y);
     }
 
+    //! 设置相机宽度, 和window保持一致
     void set_width(int width) {
         width_ = width;
     }
 
+    //! 设置相机高度, 和window保持一致
     void set_height(int height) {
         height_ = height;
     }
 
 private:
-    glm::vec3 position_;
-    glm::vec3 up_;
-    glm::vec3 lookat_; //!< center
-    glm::vec3 right_{1.0f, 0.0f, 0.0f};
-    float radius_;
-    float zoom_{45.0f};
-    float near_{0.1f};
-    float far_{100.0f};
+    glm::vec3 position_; //!< 相机位置, 有时候也叫 eye (眼睛位置)
+    glm::vec3 up_; //!< 上向量, 固定为(0, 1, 0)
+    glm::vec3 lookat_; //!< 看向哪里, 有时也叫 center
+    glm::vec3 right_{1.0f, 0.0f, 0.0f}; //!< 右向量
+    float radius_; //!< trackball的半径, 暂时没有用到
+    float zoom_{45.0f}; //!< 缩放, 通过鼠标滚轮调整
+    float near_{0.1f}; //!< 用于生成投影矩阵
+    float far_{100.0f}; //!< 用于生成投影矩阵
 
     // old coord
-    glm::vec2 last_{0.0f, 0.0f};
+    glm::vec2 last_{0.0f, 0.0f}; //!< 上一帧的坐标
 
     // window's width and height
-    int width_;
-    int height_;
+    int width_; //!< 窗口宽度
+    int height_; //!< 窗口高度
 };
 
 }

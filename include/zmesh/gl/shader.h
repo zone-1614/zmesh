@@ -2,6 +2,7 @@
  * @file shader.h
  * @author zone-1614 (you@domain.com)
  * @brief 着色器类, 只有vertex shader和fragment shader
+ * 这个类跟learnopengl基本一致
  * @version 0.1
  * @date 2023-06-28
  * 
