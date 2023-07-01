@@ -141,32 +141,40 @@ void MeshWindow::mainloop() {
     shader_->set_vec3("light_color", light_color_);
     shader_->set_vec3("object_color", object_color_);
     shader_->set_vec3("view_pos", camera_->get_position());
-    // shader_->set_vec3("light_pos", glm::vec3(3.0f, 3.0f, 3.0f));
-    shader_->set_vec3("light_pos", camera_->get_position());
+    shader_->set_vec3("light_pos", camera_->get_position() * 3.0f);
 
     glBindVertexArray(vao_);
 
-    // 画三角形
-    shader_->set_vec4("temp_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    unsigned int face_indices_ = mesh_.n_faces() * 3;
-    glDepthRange(0.01, 1.0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, febo_);
-    glDrawElements(GL_TRIANGLES, face_indices_, GL_UNSIGNED_INT, 0);
+    if (draw_mode_ & DrawMode::PhongShading) {
+        // 画三角形
+        shader_->set_bool("enable_shading", true);
+        shader_->set_vec4("temp_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+        unsigned int face_indices_ = mesh_.n_faces() * 3;
+        glDepthRange(0.01, 1.0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, febo_);
+        glDrawElements(GL_TRIANGLES, face_indices_, GL_UNSIGNED_INT, 0);
+    }
 
-    // 画线框
-    shader_->set_vec4("temp_color", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    unsigned int edge_indices_ = mesh_.n_edges() * 2;
-    glDepthRange(0.0, 1.0);
-    glDepthFunc(GL_LEQUAL); // 设置状态: 深度测试函数为小于等于
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eebo_);
-    glDrawElements(GL_LINES, edge_indices_, GL_UNSIGNED_INT, 0);
-    glDepthFunc(GL_LESS); // 恢复深度测试函数
+    if (draw_mode_ & DrawMode::WireFrame) {
+        // 画线框
+        shader_->set_bool("enable_shading", false);
+        shader_->set_vec4("temp_color", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        unsigned int edge_indices_ = mesh_.n_edges() * 2;
+        glDepthRange(0.0, 1.0);
+        glDepthFunc(GL_LEQUAL); // 设置状态: 深度测试函数为小于等于
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eebo_);
+        glDrawElements(GL_LINES, edge_indices_, GL_UNSIGNED_INT, 0);
+        glDepthFunc(GL_LESS); // 恢复深度测试函数
+    }
 
-    // 画顶点
-    shader_->set_float("point_size", point_size_);
-    shader_->set_vec4("temp_color", glm::vec4(0.439f, 0.337f, 0.592f, 1.0f)); // rgb: 112, 86, 151
-    unsigned int vertex_indices_ = mesh_.n_vertices();
-    glDrawArrays(GL_POINTS, 0, vertex_indices_);
+    if (draw_mode_ & DrawMode::Points) {
+        // 画顶点
+        shader_->set_bool("enable_shading", false);
+        shader_->set_float("point_size", point_size_);
+        shader_->set_vec4("temp_color", glm::vec4(0.439f, 0.337f, 0.592f, 1.0f)); // rgb: 112, 86, 151
+        unsigned int vertex_indices_ = mesh_.n_vertices();
+        glDrawArrays(GL_POINTS, 0, vertex_indices_);
+    }
 
     glBindVertexArray(0);
 

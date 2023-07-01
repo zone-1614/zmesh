@@ -3,3 +3,6 @@ build
 docs/site
 screenshot
 imgui.ini
+docs/build
+docs/source/_doxygen
+docs/source/api
