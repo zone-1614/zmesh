@@ -6,3 +6,4 @@ imgui.ini
 docs/_build
 docs/_doxygen
 docs/api
+docs/sphinx
