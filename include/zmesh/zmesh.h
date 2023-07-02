@@ -13,7 +13,6 @@
 #include <zmesh/core/mesh.h>
 #include <zmesh/io/io.h>
 #include <zmesh/gl/mesh_window.h>
-#include <zmesh/gl/mesh_window_builder.h>
 
 namespace zmesh {
 

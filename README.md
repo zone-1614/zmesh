@@ -18,7 +18,7 @@ ZMesh目前只是一套数据结构, 后续会添加可视化之类的功能和�
 * gl: OpenGL相关
   * [x] Mesh可视化
   * UI
-    * [ ] log
+    * [x] log
     * [ ] file
     * [ ] 将mesh渲染在imgui中
 * algo: 算法相关

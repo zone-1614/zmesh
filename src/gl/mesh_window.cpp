@@ -249,16 +249,6 @@ void MeshWindow::mainloop() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    // 更新 OpenGL buffers
-    // 频繁更新导致卡顿, 暂时不更新
-    // 更新顶点法向
-    // auto vnormals = algo::vertex_normals(mesh_);
-    // auto vnormals_vector = vnormals.vector();
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, normal_buffer_);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, vnormals_vector.size() * 3 * sizeof(float), vnormals_vector.data(), GL_STATIC_DRAW);
-    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    // glEnableVertexAttribArray(1);
-
     shader_->use();
     auto P = camera_->get_projection_matrix();
     auto V = camera_->get_view_matrix();

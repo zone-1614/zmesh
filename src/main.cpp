@@ -1,4 +1,4 @@
-#include <zmesh/gl/mesh_window.h>
+#include <zmesh/zmesh.h>
 
 #include <filesystem>
 

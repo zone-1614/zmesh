@@ -17,7 +17,10 @@ namespace gl {
 //! 能够获取std::string的sink
 class str_sink : public spdlog::sinks::base_sink<std::mutex> {
 public: 
+    //! 得到所有log
     std::vector<std::string> get_logs();
+
+    //! 清除所有log
     void clear();
 
 protected:
@@ -28,10 +31,15 @@ private:
     std::vector<std::string> logs_;
 };
 
+//! log 窗口
 class LogWindow {
 public:
     LogWindow();
+
+    //! 清除所有log
     void clear();
+
+    //! 渲染imgui
     void draw();
 };
 

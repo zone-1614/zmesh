@@ -105,6 +105,8 @@ protected:
         return {x, y};
     }
 
+    //! 从文件目录加载mesh
+    void load_mesh(std::filesystem::path path);
     
 private:
     void mainloop();

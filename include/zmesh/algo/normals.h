@@ -51,9 +51,6 @@ core::FacePropertyHandle<core::Normal> face_normals(core::Mesh& mesh) {
 
 //! 用周围的面法向来计算顶点法向
 core::Normal vertex_normal(core::Mesh& mesh, core::VertexHandle& v) {
-    if (!mesh.exist_face_property(core::PropertyNames::fnormals)) {
-        face_normals(mesh);
-    }
     auto fnormals = mesh.get_face_property<core::Normal>(core::PropertyNames::fnormals);
     core::Normal sum{0.0f, 0.0f, 0.0f}; // 邻域法向之和
     for (auto f : mesh.faces(v)) {
@@ -64,6 +61,7 @@ core::Normal vertex_normal(core::Mesh& mesh, core::VertexHandle& v) {
 }
 
 core::VertexPropertyHandle<core::Normal> vertex_normals(core::Mesh& mesh) {
+    face_normals(mesh);
     auto vnormals = mesh.get_or_add_vertex_property<core::Normal>(core::PropertyNames::vnormals);
     for (auto v : mesh.vertices()) {
         vnormals[v] = vertex_normal(mesh, v);
