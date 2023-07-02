@@ -18,9 +18,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 #include <spdlog/spdlog.h>
 
 #include <zmesh/gl/shader.h>
@@ -95,7 +92,8 @@ protected:
     //! 初始化imgui的样式
     void init_imgui_style();
 
-    //! 截图
+    //! 截图,
+    //! 在imgui的button中直接执行并不会截图, 需要有一点特殊的处理, 在opengl画完东西之后再截图, 借助辅助变量 screenshot_
     void screenshot();
 
     //! 鼠标位置, 范围是 [0, width], [0, height], 左上角为 (0, 0)
@@ -180,6 +178,8 @@ private:
 
     // ui
     LogWindow log_window_;
+
+    bool enable_screenshot_{false}; //!< 截图的辅助变量
 };
 
 }

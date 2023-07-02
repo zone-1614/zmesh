@@ -3,16 +3,21 @@
 #include <exception>
 #include <string>
 #include <sstream>
+#include <thread>
 
 #include <spdlog/spdlog.h>
 // 这两个define不能放在头文件里面
 #define STBIW_WINDOWS_UTF8
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include <zmesh/algo/bbox.h>
 #include <zmesh/io/io.h>
 #include <zmesh/algo/normals.h>
+#include <zmesh/util.h>
 
 namespace zmesh {
 namespace gl {
@@ -211,21 +216,24 @@ void MeshWindow::screenshot() {
     std::filesystem::create_directory("./screenshot");
 
     static int screenshot_count = 0;
-    std::stringstream filename;
-    filename << "./screenshot/" << title_ << "_" << screenshot_count << ".png";
 
-    // allocate memory 
-    auto png_data = new unsigned char[3 * width_ * height_];
+    // auto screenshot_thread = std::thread([&] {
+        std::stringstream filename;
+        filename << "./screenshot/" << title_ << "_" << screenshot_count++ << ".png";
+        // allocate memory 
+        auto png_data = new unsigned char[3 * width_ * height_];
 
-    // read the framebuffer
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, png_data);
-
-    // save the screen to png (use stb image write)
-    stbi_write_png(filename.str().c_str(), width_, height_, 3, png_data, 3 * width_);
-
-    spdlog::info("save screenshot to {}", filename.str().c_str());
-    delete[] png_data;
+        glfwMakeContextCurrent(glfw_window_);
+        // read the framebuffer
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, png_data);
+        stbi_flip_vertically_on_write(true);
+        // save the screen to png (use stb image write)
+        stbi_write_png(filename.str().c_str(), width_, height_, 3, png_data, 3 * width_);
+        delete[] png_data;
+        spdlog::info("save screenshot to {}", filename.str().c_str());
+    // });
+    // screenshot_thread.detach();
 }
 
 void MeshWindow::mainloop() {
@@ -239,15 +247,16 @@ void MeshWindow::mainloop() {
     // ui
     ImGui::Begin("file");
     if (ImGui::Button("select file")) {
-        spdlog::info("hhh");
+        
     }
-
+    if (ImGui::Button("screenshot")) {
+        enable_screenshot_ = true;
+    }
     ImGui::End();
 
     log_window_.draw();
 
     ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     shader_->use();
     auto P = camera_->get_projection_matrix();
@@ -277,7 +286,6 @@ void MeshWindow::mainloop() {
     if (draw_mode_ & DrawMode::WireFrame) {
         // 画线框
         shader_->set_bool("enable_shading", false);
-        shader_->set_vec4("temp_color", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         unsigned int edge_indices_ = mesh_.n_edges() * 2;
         glDepthRange(0.0, 1.0);
         glDepthFunc(GL_LEQUAL); // 设置状态: 深度测试函数为小于等于
@@ -290,12 +298,18 @@ void MeshWindow::mainloop() {
         // 画顶点
         shader_->set_bool("enable_shading", false);
         shader_->set_float("point_size", point_size_);
-        shader_->set_vec4("temp_color", glm::vec4(0.439f, 0.337f, 0.592f, 1.0f)); // rgb: 112, 86, 151
         unsigned int vertex_indices_ = mesh_.n_vertices();
         glDrawArrays(GL_POINTS, 0, vertex_indices_);
     }
 
     glBindVertexArray(0);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // 直到调用这个函数, ui才会画上去, 所以ui会在前面画的东西上边
+
+    // 截图在这里执行
+    if (enable_screenshot_) {
+        enable_screenshot_ = false;
+        screenshot();
+    }
 
     glfwSwapBuffers(glfw_window_);
     glfwPollEvents();
@@ -327,6 +341,10 @@ void MeshWindow::key_callback(GLFWwindow* window, int key, int scancode, int act
         case GLFW_KEY_LEFT_ALT:
             mesh_window->left_alt_pressed_ = (action != GLFW_RELEASE);
             break;
+        // case GLFW_KEY_T:
+        //     if (action == GLFW_PRESS)
+        //         mesh_window->screenshot();
+        //     break;
     }
 }
 
@@ -360,10 +378,12 @@ void MeshWindow::mouse_button_callback(GLFWwindow* window, int button, int actio
 }
 
 void MeshWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    // ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 
-    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
-    mesh_window->camera_->scroll(yoffset);
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+        mesh_window->camera_->scroll(yoffset);
+    }
 }
 
 }
