@@ -5,14 +5,14 @@
 #include <sstream>
 
 #include <spdlog/spdlog.h>
-
-#include <zmesh/algo/bbox.h>
-#include <zmesh/io/io.h>
-#include <zmesh/algo/normals.h>
 // 这两个define不能放在头文件里面
 #define STBIW_WINDOWS_UTF8
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
+
+#include <zmesh/algo/bbox.h>
+#include <zmesh/io/io.h>
+#include <zmesh/algo/normals.h>
 
 namespace zmesh {
 namespace gl {
@@ -24,6 +24,7 @@ MeshWindow::MeshWindow(
     std::filesystem::path mesh_path
 ) : width_(width), height_(height), title_(title) {
 
+    // 从文件读mesh
     io::read(mesh_, mesh_path);
 
     glfwInit();
@@ -111,6 +112,11 @@ MeshWindow::MeshWindow(
     glBindVertexArray(vao_);
 
     auto vertices = mesh_.points();
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     std::vector<unsigned int> face_indices;
     face_indices.reserve(mesh_.n_faces() * 3);
     for (auto f : mesh_.faces()) {
@@ -118,6 +124,8 @@ MeshWindow::MeshWindow(
             face_indices.push_back(v.idx());
         }
     }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, febo_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_indices.size() * sizeof(unsigned int), face_indices.data(), GL_STATIC_DRAW);
 
     std::vector<unsigned int> edge_indices;
     edge_indices.reserve(mesh_.n_edges() * 2);
@@ -125,21 +133,11 @@ MeshWindow::MeshWindow(
         edge_indices.push_back(e.v0().idx());
         edge_indices.push_back(e.v1().idx());
     }
-
-    auto vnormals = algo::vertex_normals(mesh_);
-    auto vnormals_vector = vnormals.vector();
-
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, febo_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_indices.size() * sizeof(unsigned int), face_indices.data(), GL_STATIC_DRAW);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eebo_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, edge_indices.size() * sizeof(unsigned int), edge_indices.data(), GL_STATIC_DRAW);
 
+    auto vnormals = algo::vertex_normals(mesh_);
+    auto vnormals_vector = vnormals.vector();
     glBindBuffer(GL_ARRAY_BUFFER, normal_buffer_);
     glBufferData(GL_ARRAY_BUFFER, vnormals_vector.size() * 3 * sizeof(float), vnormals_vector.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);

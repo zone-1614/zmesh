@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include <zmesh/core/Mesh.h>
-
 #include <vector>
+
+#include <zmesh/core/Mesh.h>
 
 namespace zmesh {
 namespace algo {
@@ -51,7 +51,10 @@ core::FacePropertyHandle<core::Normal> face_normals(core::Mesh& mesh) {
 
 //! 用周围的面法向来计算顶点法向
 core::Normal vertex_normal(core::Mesh& mesh, core::VertexHandle& v) {
-    auto fnormals = face_normals(mesh);
+    if (!mesh.exist_face_property(core::PropertyNames::fnormals)) {
+        face_normals(mesh);
+    }
+    auto fnormals = mesh.get_face_property<core::Normal>(core::PropertyNames::fnormals);
     core::Normal sum{0.0f, 0.0f, 0.0f}; // 邻域法向之和
     for (auto f : mesh.faces(v)) {
         if (!f.is_valid()) continue;
