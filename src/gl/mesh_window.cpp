@@ -32,6 +32,13 @@ MeshWindow::MeshWindow(
     // 从文件读mesh
     io::read(mesh_, mesh_path);
 
+    // init models, 加载models文件夹下面的文件
+    auto models_path = std::filesystem::path("./models");
+    auto models_path_iter = std::filesystem::directory_iterator(models_path);
+    for (auto obj : models_path_iter) {
+        models_.push_back(obj.path());
+    }
+
     glfwInit();
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -155,6 +162,9 @@ MeshWindow::MeshWindow(
 }
 
 MeshWindow::~MeshWindow() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwTerminate();
 }
 
@@ -171,7 +181,8 @@ void MeshWindow::init_imgui_style() {
     style.Colors[ImGuiCol_Text] = ImVec4(0.31f, 0.25f, 0.24f, 1.00f);
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
     style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.74f, 0.74f, 0.94f, 1.00f);
-    // style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.68f, 0.68f, 0.68f, 0.00f);
+    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.68f, 0.68f, 0.68f, 0.00f);
+    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.8f, 0.8f, 0.8f, 1.00f); // --- 我添加的
     style.Colors[ImGuiCol_Border] = ImVec4(0.50f, 0.50f, 0.50f, 0.60f);
     style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
     style.Colors[ImGuiCol_FrameBg] = ImVec4(0.62f, 0.70f, 0.72f, 0.56f);
@@ -216,24 +227,29 @@ void MeshWindow::screenshot() {
     std::filesystem::create_directory("./screenshot");
 
     static int screenshot_count = 0;
+    std::stringstream filename;
+    filename << "./screenshot/" << title_ << "_" << screenshot_count++ << ".png";
+    std::string filename_str = filename.str();
+    // allocate memory 
+    auto png_data = new unsigned char[3 * width_ * height_];
 
-    // auto screenshot_thread = std::thread([&] {
-        std::stringstream filename;
-        filename << "./screenshot/" << title_ << "_" << screenshot_count++ << ".png";
-        // allocate memory 
-        auto png_data = new unsigned char[3 * width_ * height_];
+    glfwMakeContextCurrent(glfw_window_);
+    // read the framebuffer
 
-        glfwMakeContextCurrent(glfw_window_);
-        // read the framebuffer
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, png_data);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, png_data);
+    auto screenshot_thread = std::thread([&, filename_str, png_data] {
         stbi_flip_vertically_on_write(true);
         // save the screen to png (use stb image write)
-        stbi_write_png(filename.str().c_str(), width_, height_, 3, png_data, 3 * width_);
+        stbi_write_png(filename_str.c_str(), width_, height_, 3, png_data, 3 * width_);
         delete[] png_data;
-        spdlog::info("save screenshot to {}", filename.str().c_str());
-    // });
-    // screenshot_thread.detach();
+        spdlog::info("save screenshot to {}", filename_str.c_str());
+    });
+    screenshot_thread.detach();
+}
+
+void MeshWindow::load_mesh(std::filesystem::path mesh_path) {
+
 }
 
 void MeshWindow::mainloop() {
@@ -245,7 +261,22 @@ void MeshWindow::mainloop() {
     ImGui::NewFrame();
 
     // ui
-    ImGui::Begin("file");
+    ImGui::Begin("file", nullptr, ImGuiTreeNodeFlags_DefaultOpen);
+    static int item_current_idx = 0;
+    const char* combo_preview_value = (models_[item_current_idx]).stem().string().c_str();
+    if (ImGui::BeginCombo("models", combo_preview_value)) {
+        for (int i = 0; i < models_.size(); i++) {
+            const bool is_selected = (item_current_idx == i);
+            if (ImGui::Selectable(models_[i].stem().string().c_str(), is_selected)) {
+                load_mesh(models_[i]);
+                item_current_idx = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
     if (ImGui::Button("select file")) {
         
     }

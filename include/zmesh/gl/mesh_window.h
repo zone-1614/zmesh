@@ -104,7 +104,7 @@ protected:
     }
 
     //! 从文件目录加载mesh
-    void load_mesh(std::filesystem::path path);
+    void load_mesh(std::filesystem::path mesh_path);
     
 private:
     void mainloop();
@@ -177,6 +177,8 @@ private:
     int draw_mode_{DrawMode::Points | DrawMode::WireFrame | DrawMode::PhongShading};
 
     // ui
+    std::vector<std::filesystem::path> models_; //!< models 文件夹下面的obj文件
+
     LogWindow log_window_;
 
     bool enable_screenshot_{false}; //!< 截图的辅助变量
