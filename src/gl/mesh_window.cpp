@@ -289,10 +289,14 @@ void MeshWindow::mainloop() {
     shader_->set_float("ambient", ambient_);
     shader_->set_float("diffuse", diffuse_);
     shader_->set_float("specular", specular_);
-    shader_->set_vec3("light_color", light_color_);
+    shader_->set_vec3("front_light_color", light_color_);
+    shader_->set_vec3("back_light_color", light_color_);
     shader_->set_vec3("object_color", object_color_);
     shader_->set_vec3("view_pos", camera_->get_position());
-    shader_->set_vec3("light_pos", camera_->get_position() * 3.0f);
+    shader_->set_vec3("front_light_pos", camera_->get_position() * 3.0f);
+    auto back_light_pos = -camera_->get_position() * 2.0f;
+    back_light_pos.y *= -1.5f;
+    shader_->set_vec3("back_light_pos", back_light_pos);
 
     glBindVertexArray(vao_);
 
@@ -469,11 +473,11 @@ void MeshWindow::mouse_button_callback(GLFWwindow* window, int button, int actio
 }
 
 void MeshWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
-
-    if (!ImGui::GetIO().WantCaptureMouse) {
-        MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    if (mesh_window->is_hover_mesh_) {
         mesh_window->camera_->scroll(yoffset);
+    } else {
+        ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);        
     }
 }
 
