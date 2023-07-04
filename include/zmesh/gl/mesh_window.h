@@ -176,12 +176,18 @@ private:
 
     int draw_mode_{DrawMode::Points | DrawMode::WireFrame | DrawMode::PhongShading};
 
+    // helpers for draw mesh on imgui
+    unsigned int fbo_; //!< framebuffer object
+    unsigned int scene_texture_; //!< 网格场景的纹理, 用于把网格画到imgui中
+    unsigned int rbo_; //!< render buffer object
+
     // ui
     std::vector<std::filesystem::path> models_; //!< models 文件夹下面的obj文件
 
     LogWindow log_window_;
 
     bool enable_screenshot_{false}; //!< 截图的辅助变量
+    bool is_hover_mesh_{false}; //!< 鼠标是否悬浮在mesh窗口上
 };
 
 }

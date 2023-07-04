@@ -20,7 +20,7 @@ ZMesh目前只是一套数据结构, 后续会添加可视化之类的功能和�
   * UI
     * [x] log
     * [ ] file
-    * [ ] 将mesh渲染在imgui中
+    * [x] 将mesh渲染在imgui中
 * algo: 算法相关
   * [x] 顶点法向
   * [x] 面法向

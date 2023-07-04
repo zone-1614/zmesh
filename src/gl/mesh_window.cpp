@@ -113,16 +113,18 @@ MeshWindow::MeshWindow(
     auto [_, bbmax] = algo::bounding_box(mesh_);
     auto radius = std::max({ bbmax[0], bbmax[1], bbmax[2] }) * 3.0f; // 数值为最大的一个坐标乘以3
     camera_ = std::make_shared<TrackballCamera>(glm::vec3(0, 0, radius));
-    camera_->set_width(width);
-    camera_->set_height(height);
+    camera_->set_width(width_);
+    camera_->set_height(height_);
 
     glGenVertexArrays(1, &vao_);
     glGenBuffers(1, &vertex_buffer_);
     glGenBuffers(1, &febo_);
     glGenBuffers(1, &eebo_);
     glGenBuffers(1, &normal_buffer_);
+
     glBindVertexArray(vao_);
 
+    
     auto vertices = mesh_.points();
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
@@ -159,6 +161,29 @@ MeshWindow::MeshWindow(
     glBindVertexArray(0);
 
     glfwMaximizeWindow(glfw_window_);
+
+    // after maximize the glfw window, init some buffer for draw the mesh into imgui
+    glGenFramebuffers(1, &fbo_);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+
+    glGenTextures(1, &scene_texture_);
+    glBindTexture(GL_TEXTURE_2D, scene_texture_);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_, height_, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, scene_texture_, 0);
+
+    glGenRenderbuffers(1, &rbo_);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width_, height_);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        spdlog::error("framebuffer is not complete");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
 MeshWindow::~MeshWindow() {
@@ -253,42 +278,9 @@ void MeshWindow::load_mesh(std::filesystem::path mesh_path) {
 }
 
 void MeshWindow::mainloop() {
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
     glClearColor(0.9294f, 0.9098f, 0.9372f, 1.0f); // RGB: 237, 232, 239
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    // ui
-    ImGui::Begin("file", nullptr, ImGuiTreeNodeFlags_DefaultOpen);
-    static int item_current_idx = 0;
-    const char* combo_preview_value = (models_[item_current_idx]).stem().string().c_str();
-    if (ImGui::BeginCombo("models", combo_preview_value)) {
-        for (int i = 0; i < models_.size(); i++) {
-            const bool is_selected = (item_current_idx == i);
-            if (ImGui::Selectable(models_[i].stem().string().c_str(), is_selected)) {
-                load_mesh(models_[i]);
-                item_current_idx = i;
-            }
-            if (is_selected) {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
-        ImGui::EndCombo();
-    }
-    if (ImGui::Button("select file")) {
-        
-    }
-    if (ImGui::Button("screenshot")) {
-        enable_screenshot_ = true;
-    }
-    ImGui::End();
-
-    log_window_.draw();
-
-    ImGui::Render();
-
     shader_->use();
     auto P = camera_->get_projection_matrix();
     auto V = camera_->get_view_matrix();
@@ -332,8 +324,65 @@ void MeshWindow::mainloop() {
         unsigned int vertex_indices_ = mesh_.n_vertices();
         glDrawArrays(GL_POINTS, 0, vertex_indices_);
     }
-
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
+
+    glClearColor(0.9294f, 0.9098f, 0.9372f, 1.0f); // RGB: 237, 232, 239
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // ui
+    ImGui::Begin("file", nullptr, ImGuiTreeNodeFlags_DefaultOpen);
+    static int item_current_idx = 0;
+    const char* combo_preview_value = (models_[item_current_idx]).stem().string().c_str();
+    if (ImGui::BeginCombo("models", combo_preview_value)) {
+        for (int i = 0; i < models_.size(); i++) {
+            const bool is_selected = (item_current_idx == i);
+            if (ImGui::Selectable(models_[i].stem().string().c_str(), is_selected)) {
+                load_mesh(models_[i]);
+                item_current_idx = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+    if (ImGui::Button("select file")) {
+        
+    }
+    if (ImGui::Button("screenshot")) {
+        enable_screenshot_ = true;
+    }
+    ImGui::End();
+
+    log_window_.draw();
+
+    // mesh
+    // ImGui::Begin("scene", nullptr, ImGuiWindowFlags_NoMove);
+    ImGui::Begin("scene");
+    {
+        ImGui::BeginChild("mesh");
+        ImGui::Image(
+            (ImTextureID) scene_texture_,
+            ImGui::GetContentRegionAvail(),
+            ImVec2(0, 1),
+            ImVec2(1, 0)
+        );
+        is_hover_mesh_ = ImGui::IsItemHovered();
+        if (!enable_trackball_) { // 之前已经是enable的话, 就不要再次判断hover了
+            enable_trackball_ = enable_trackball_ && is_hover_mesh_;
+        }
+    }
+    ImGui::EndChild();
+    ImGui::End();
+
+    ImGui::Render();
+
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // 直到调用这个函数, ui才会画上去, 所以ui会在前面画的东西上边
 
     // 截图在这里执行
@@ -353,6 +402,15 @@ void MeshWindow::framebuffer_size_callback(GLFWwindow* window, int width, int he
     mesh_window->camera_->set_width(width);
     mesh_window->camera_->set_height(height);
     glViewport(0, 0, width, height);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mesh_window->width_, mesh_window->height_, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mesh_window->scene_texture_, 0);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, mesh_window->rbo_);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, mesh_window->width_, mesh_window->height_);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mesh_window->rbo_);
 }
 
 void MeshWindow::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -389,10 +447,8 @@ void MeshWindow::cursor_pos_callback(GLFWwindow* window, double xpos, double ypo
 }
 
 void MeshWindow::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-
-    if (!ImGui::GetIO().WantCaptureMouse) {
-        MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    MeshWindow* mesh_window = static_cast<MeshWindow*>(glfwGetWindowUserPointer(window));
+    if (mesh_window->is_hover_mesh_) {
         mesh_window->mouse_button_pressed_[button] = (action != GLFW_RELEASE);
 
         // 按下鼠标左键开启trackball
@@ -401,10 +457,14 @@ void MeshWindow::mouse_button_callback(GLFWwindow* window, int button, int actio
             mesh_window->camera_->set_last(x, y);
             mesh_window->enable_trackball_ = true;
         }
-        // 松开鼠标左键关闭trackball
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-            mesh_window->enable_trackball_ = false;
-        }
+    } else {
+        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+    }
+
+    // 放在上一个if外面是因为这样可以让鼠标在mesh窗口外面松开
+    // 松开鼠标左键关闭trackball
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        mesh_window->enable_trackball_ = false;
     }
 }
 
