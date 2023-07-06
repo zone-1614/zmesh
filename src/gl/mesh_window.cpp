@@ -208,9 +208,10 @@ void MeshWindow::screenshot() {
     // 不存在则创建screenshot目录
     std::filesystem::create_directory("./screenshot");
 
-    static int screenshot_count = 0;
+    auto now = std::chrono::steady_clock::now();
+    // auto model_name = 
     std::stringstream filename;
-    filename << "./screenshot/" << title_ << "_" << screenshot_count++ << ".png";
+    filename << "./screenshot/" << models_[item_current_idx].stem().string() << "_" << now.time_since_epoch().count() << ".png";
     std::string filename_str = filename.str();
     // allocate memory 
     auto png_data = new unsigned char[3 * width_ * height_];
@@ -355,7 +356,6 @@ void MeshWindow::mainloop() {
     ImGui::Begin("settings", nullptr, ImGuiTreeNodeFlags_DefaultOpen);
 
     // select models
-    static int item_current_idx = 0;
     const std::string combo_preview_str = (models_[item_current_idx]).stem().string();
     const char* combo_preview_value = combo_preview_str.c_str();
     if (ImGui::BeginCombo("models", combo_preview_value)) {
@@ -459,10 +459,6 @@ void MeshWindow::key_callback(GLFWwindow* window, int key, int scancode, int act
         case GLFW_KEY_LEFT_ALT:
             mesh_window->left_alt_pressed_ = (action != GLFW_RELEASE);
             break;
-        // case GLFW_KEY_T:
-        //     if (action == GLFW_PRESS)
-        //         mesh_window->screenshot();
-        //     break;
     }
 }
 

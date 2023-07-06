@@ -163,7 +163,7 @@ private:
     float diffuse_{0.7f};
     float specular_{0.5f};
     glm::vec3 light_color_{1.0f, 1.0f, 1.0f};
-    glm::vec3 object_color_{0.7843f, 0.7843f, 0.7843f}; // rgb: 193, 255, 193
+    glm::vec3 object_color_{0.8627f, 0.8627f, 0.8627f}; // rgb: 220, 220, 220
 
     // opengl 相关
     unsigned int vao_; //!< vertex array object
@@ -184,6 +184,8 @@ private:
 
     // ui
     std::vector<std::filesystem::path> models_; //!< models 文件夹下面的obj文件
+    int item_current_idx = 0; //!< 当前选择的model的下标
+
 
     LogWindow log_window_;
 

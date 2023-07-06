@@ -19,11 +19,18 @@ ZMesh目前只是一套数据结构, 后续会添加可视化之类的功能和�
   * [x] Mesh可视化
   * UI
     * [x] log
-    * [ ] file
+    * [x] settings
     * [x] 将mesh渲染在imgui中
 * algo: 算法相关
   * [x] 顶点法向
   * [x] 面法向
+
+# 截图
+![](./screenshot/Balls_5102504592500.png)
+
+![](./screenshot/Nefertiti_face_5119081257800.png)
+
+![](./screenshot/pig_tri_5134297507800.png)
 
 # 参考
 [OpenMesh](https://www.graphics.rwth-aachen.de/software/openmesh/): 非常好用的网格库

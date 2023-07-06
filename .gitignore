@@ -1,7 +1,7 @@
 .vscode
 build
 docs/site
-screenshot
+# screenshot
 imgui.ini
 docs/_build
 docs/_doxygen
