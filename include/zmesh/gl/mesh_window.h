@@ -40,8 +40,7 @@ public:
     MeshWindow(
         int width, 
         int height, 
-        std::string title, 
-        std::filesystem::path mesh_path
+        std::string title
     );
     ~MeshWindow();
 
@@ -105,6 +104,8 @@ protected:
 
     //! 从文件目录加载mesh
     void load_mesh(std::filesystem::path mesh_path);
+
+    void update_opengl_buffers();
     
 private:
     void mainloop();
@@ -158,11 +159,11 @@ private:
 
     // shader相关
     std::shared_ptr<Shader> shader_;
-    float ambient_{0.1f};
-    float diffuse_{0.9f};
-    float specular_{0.8f};
+    float ambient_{0.2f};
+    float diffuse_{0.7f};
+    float specular_{0.5f};
     glm::vec3 light_color_{1.0f, 1.0f, 1.0f};
-    glm::vec3 object_color_{0.439f, 0.337f, 0.592f}; // rgb: 112, 86, 151
+    glm::vec3 object_color_{0.7843f, 0.7843f, 0.7843f}; // rgb: 193, 255, 193
 
     // opengl 相关
     unsigned int vao_; //!< vertex array object

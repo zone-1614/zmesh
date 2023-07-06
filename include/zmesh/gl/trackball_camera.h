@@ -39,6 +39,10 @@ public:
 
     //! 返回相机位置
     glm::vec3 get_position() { return position_; }
+
+    float get_radius() { return radius_; }
+
+    glm::vec3 get_right() { return right_; };
     
     //! @param xpos 当前x坐标
     //! @param ypos 当前y坐标
@@ -111,6 +115,12 @@ public:
     //! 设置相机高度, 和window保持一致
     void set_height(int height) {
         height_ = height;
+    }
+
+    void set_radius(float radius) {
+        radius_ = radius;
+        // near_ = 2.0f * radius;
+        // far_ = -near_;
     }
 
 private:

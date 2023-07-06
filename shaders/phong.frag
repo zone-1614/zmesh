@@ -50,7 +50,7 @@ void main() {
         vec3 back_light_color = back_ambient_ + back_diffuse_ + back_specular_;
         back_light_color = back_light_color * object_color;
 
-        frag_color = vec4(front_light_color + back_light_color, 1.0);
+        frag_color = vec4(front_light_color, 1.0);
     } else {
         frag_color = vec4(0.0, 0.0, 0.0, 1.0);
     }

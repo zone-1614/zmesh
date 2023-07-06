@@ -25,12 +25,8 @@ namespace gl {
 MeshWindow::MeshWindow(
     int width, 
     int height, 
-    std::string title, 
-    std::filesystem::path mesh_path
+    std::string title
 ) : width_(width), height_(height), title_(title) {
-
-    // 从文件读mesh
-    io::read(mesh_, mesh_path);
 
     // init models, 加载models文件夹下面的文件
     auto models_path = std::filesystem::path("./models");
@@ -38,6 +34,9 @@ MeshWindow::MeshWindow(
     for (auto obj : models_path_iter) {
         models_.push_back(obj.path());
     }
+
+    // 从文件读mesh
+    io::read(mesh_, models_.front());
 
     glfwInit();
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -109,56 +108,14 @@ MeshWindow::MeshWindow(
         std::filesystem::path("./shaders/phong.frag")
     );
 
-    // 利用bbox计算一开始相机的位置
     auto [_, bbmax] = algo::bounding_box(mesh_);
-    auto radius = std::max({ bbmax[0], bbmax[1], bbmax[2] }) * 3.0f; // 数值为最大的一个坐标乘以3
+    auto radius = std::max(bbmax[0], std::max(bbmax[1], bbmax[2])) * 3.0f;
     camera_ = std::make_shared<TrackballCamera>(glm::vec3(0, 0, radius));
+    camera_->set_radius(radius);
     camera_->set_width(width_);
     camera_->set_height(height_);
 
-    glGenVertexArrays(1, &vao_);
-    glGenBuffers(1, &vertex_buffer_);
-    glGenBuffers(1, &febo_);
-    glGenBuffers(1, &eebo_);
-    glGenBuffers(1, &normal_buffer_);
-
-    glBindVertexArray(vao_);
-
-    
-    auto vertices = mesh_.points();
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    std::vector<unsigned int> face_indices;
-    face_indices.reserve(mesh_.n_faces() * 3);
-    for (auto f : mesh_.faces()) {
-        for (auto v : f.vertices()) {
-            face_indices.push_back(v.idx());
-        }
-    }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, febo_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_indices.size() * sizeof(unsigned int), face_indices.data(), GL_STATIC_DRAW);
-
-    std::vector<unsigned int> edge_indices;
-    edge_indices.reserve(mesh_.n_edges() * 2);
-    for (auto e : mesh_.edges()) {
-        edge_indices.push_back(e.v0().idx());
-        edge_indices.push_back(e.v1().idx());
-    }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eebo_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, edge_indices.size() * sizeof(unsigned int), edge_indices.data(), GL_STATIC_DRAW);
-
-    auto vnormals = algo::vertex_normals(mesh_);
-    auto vnormals_vector = vnormals.vector();
-    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer_);
-    glBufferData(GL_ARRAY_BUFFER, vnormals_vector.size() * 3 * sizeof(float), vnormals_vector.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    update_opengl_buffers();
 
     glfwMaximizeWindow(glfw_window_);
 
@@ -274,12 +231,67 @@ void MeshWindow::screenshot() {
 }
 
 void MeshWindow::load_mesh(std::filesystem::path mesh_path) {
+    io::read(mesh_, mesh_path);
 
+    // update camera
+    auto [_, bbmax] = algo::bounding_box(mesh_);
+    auto radius = std::max({ bbmax[0], bbmax[1], bbmax[2] }) * 3.0f; // 数值为最大的一个坐标乘以3
+    camera_ = std::make_shared<TrackballCamera>(glm::vec3(0, 0, radius));
+    camera_->set_radius(radius);
+    camera_->set_width(width_);
+    camera_->set_height(height_);
+
+    update_opengl_buffers();
+}
+
+void MeshWindow::update_opengl_buffers() {
+    glGenVertexArrays(1, &vao_);
+    glGenBuffers(1, &vertex_buffer_);
+    glGenBuffers(1, &febo_);
+    glGenBuffers(1, &eebo_);
+    glGenBuffers(1, &normal_buffer_);
+
+    glBindVertexArray(vao_);
+    
+    auto vertices = mesh_.points();
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    std::vector<unsigned int> face_indices;
+    face_indices.reserve(mesh_.n_faces() * 3);
+    for (auto f : mesh_.faces()) {
+        for (auto v : f.vertices()) {
+            face_indices.push_back(v.idx());
+        }
+    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, febo_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_indices.size() * sizeof(unsigned int), face_indices.data(), GL_STATIC_DRAW);
+
+    std::vector<unsigned int> edge_indices;
+    edge_indices.reserve(mesh_.n_edges() * 2);
+    for (auto e : mesh_.edges()) {
+        edge_indices.push_back(e.v0().idx());
+        edge_indices.push_back(e.v1().idx());
+    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eebo_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, edge_indices.size() * sizeof(unsigned int), edge_indices.data(), GL_STATIC_DRAW);
+
+    auto vnormals = algo::vertex_normals(mesh_);
+    auto vnormals_vector = vnormals.vector();
+    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer_);
+    glBufferData(GL_ARRAY_BUFFER, vnormals_vector.size() * 3 * sizeof(float), vnormals_vector.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void MeshWindow::mainloop() {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-    glClearColor(0.9294f, 0.9098f, 0.9372f, 1.0f); // RGB: 237, 232, 239
+    glClearColor(0.9412f, 0.9412f, 0.9412f, 1.0f); // RGB: 240, 240, 240
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shader_->use();
     auto P = camera_->get_projection_matrix();
@@ -293,10 +305,10 @@ void MeshWindow::mainloop() {
     shader_->set_vec3("back_light_color", light_color_);
     shader_->set_vec3("object_color", object_color_);
     shader_->set_vec3("view_pos", camera_->get_position());
-    shader_->set_vec3("front_light_pos", camera_->get_position() * 3.0f);
-    auto back_light_pos = -camera_->get_position() * 2.0f;
-    back_light_pos.y *= -1.5f;
-    shader_->set_vec3("back_light_pos", back_light_pos);
+    auto front_light_pos = camera_->get_position() * camera_->get_radius();
+    shader_->set_vec3("front_light_pos", front_light_pos);
+    // auto back_light_pos = camera_->get_position() * camera_->get_radius();
+    // shader_->set_vec3("back_light_pos", back_light_pos);
 
     glBindVertexArray(vao_);
 
@@ -331,7 +343,7 @@ void MeshWindow::mainloop() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
 
-    glClearColor(0.9294f, 0.9098f, 0.9372f, 1.0f); // RGB: 237, 232, 239
+    glClearColor(0.9412f, 0.9412f, 0.9412f, 1.0f); // RGB: 240, 240, 240
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     
@@ -340,9 +352,12 @@ void MeshWindow::mainloop() {
     ImGui::NewFrame();
 
     // ui
-    ImGui::Begin("file", nullptr, ImGuiTreeNodeFlags_DefaultOpen);
+    ImGui::Begin("settings", nullptr, ImGuiTreeNodeFlags_DefaultOpen);
+
+    // select models
     static int item_current_idx = 0;
-    const char* combo_preview_value = (models_[item_current_idx]).stem().string().c_str();
+    const std::string combo_preview_str = (models_[item_current_idx]).stem().string();
+    const char* combo_preview_value = combo_preview_str.c_str();
     if (ImGui::BeginCombo("models", combo_preview_value)) {
         for (int i = 0; i < models_.size(); i++) {
             const bool is_selected = (item_current_idx == i);
@@ -356,19 +371,29 @@ void MeshWindow::mainloop() {
         }
         ImGui::EndCombo();
     }
-    if (ImGui::Button("select file")) {
-        
-    }
+
+    // screenshot 
     if (ImGui::Button("screenshot")) {
         enable_screenshot_ = true;
     }
+
+    // object color
+    ImGui::ColorEdit3("object color", glm::value_ptr(object_color_));
+    // ambient, diffuse, specular ...
+    static const float drag_speed = 0.001f;
+    static const float material_min = 0.01f;
+    static const float material_max = 0.99f;
+    ImGui::DragFloat("ambient", &ambient_, drag_speed, material_min, material_max);
+    ImGui::DragFloat("diffuse", &diffuse_, drag_speed, material_min, material_max);
+    ImGui::DragFloat("specular", &specular_, drag_speed, material_min, material_max);
+    
     ImGui::End();
 
     log_window_.draw();
 
     // mesh
-    // ImGui::Begin("scene", nullptr, ImGuiWindowFlags_NoMove);
-    ImGui::Begin("scene");
+    ImGui::Begin("scene", nullptr, ImGuiWindowFlags_NoMove);
+    // ImGui::Begin("scene");
     {
         ImGui::BeginChild("mesh");
         ImGui::Image(
