@@ -1,36 +1,15 @@
 # ZMesh
-ZMesh: 更适合中国宝宝体质的图形学框架
-
-ZMesh目前只是一套数据结构, 后续会添加可视化之类的功能和一些几何处理算法
+ZMesh是一套的网格数据结构, 带有一些几何处理算法的实现和文件io功能
 
 # 目录
 * core: mesh数据结构
-  * [x] Mesh
-  * [x] Iterator
-  * [x] Circulator
-  * [x] SmartHandle
 * io: 读写文件
-  * [x] ObjReader
-  * [ ] ObjWriter
-  * [ ] OffReader 
-  * [ ] OffWriter
-  * [ ] 其他3D文件的 Reader 和 Writer
-* gl: OpenGL相关
-  * [x] Mesh可视化
-  * UI
-    * [x] log
-    * [x] settings
-    * [x] 将mesh渲染在imgui中
 * algo: 算法相关
-  * [x] 顶点法向
-  * [x] 面法向
 
-# 截图
-![](./screenshot/Balls_5102504592500.png)
-
-![](./screenshot/Nefertiti_face_5119081257800.png)
-
-![](./screenshot/pig_tri_5134297507800.png)
+# 更新说明
+之前在这个仓库中有一个可视化功能的实现, 本次更新将相关部分删除了. 原因如下
+* 在设计之初, 这个仓库就是为了写一个网格库, 没有可视化的打算, 可视化只是为了看看效果是否正确
+* 之前的可视化用的是OpenGL和ImGui之类的技术, 而ImGui的功能贫瘠, 中文资料稀少, 比较难开发, 之后应该会用Qt开发一个可视化
 
 # 参考
 [OpenMesh](https://www.graphics.rwth-aachen.de/software/openmesh/): 非常好用的网格库
